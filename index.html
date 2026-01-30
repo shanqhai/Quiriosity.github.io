@@ -7,83 +7,42 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;900&family=Bungee&display=swap');
+        :root { --bg: #0a0a12; --card: #161625; --accent: #00f2fe; --red: #ff0055; --gold: #ffcc00; --green: #00ff88; }
         
-        :root { 
-            --bg: #2d0a0a; 
-            --card: #4a0e0e; 
-            --accent: #ffcc00; 
-            --red: #ff4757; 
-            --text: #ffffff; 
-        }
+        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .card { background: var(--card); border-radius: 30px; padding: 25px; width: 90%; max-width: 450px; text-align: center; border: 1px solid rgba(0,242,254,0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; z-index: 10; max-height: 90vh; overflow-y: auto; }
         
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Outfit', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            overflow: hidden; 
-        }
-
-        .card { 
-            background: var(--card); 
-            border-radius: 30px; 
-            padding: 25px; 
-            width: 95%; 
-            max-width: 550px; 
-            text-align: center; 
-            border: 4px solid var(--accent); 
-            box-shadow: 0 0 30px rgba(255, 204, 0, 0.2); 
-            max-height: 92vh; 
-            overflow-y: auto; 
-            position: relative;
-        }
+        /* FX ANIMATIONS */
+        @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.6); } 70% { box-shadow: 0 0 0 20px rgba(255, 204, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); } }
+        @keyframes flash-green { 0% { background: rgba(0,255,136,0); } 50% { background: rgba(0,255,136,0.15); } 100% { background: rgba(0,255,136,0); } }
+        @keyframes pizza-drop { 0% { transform: scale(4) translateY(-200px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
         
-        /* Views */
+        .correct-flash { animation: flash-green 0.5s ease; }
         .view { display: none; flex-direction: column; gap: 15px; }
-        .active { display: flex; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        
-        /* Feedback */
-        .shake { animation: shake 0.4s; border: 4px solid var(--red) !important; }
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-8px);} 75% {transform: translateX(8px);} }
+        .active { display: flex; animation: viewIn 0.4s ease-out; }
+        @keyframes viewIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Branding & Buttons */
-        .logo { font-family: 'Bungee'; color: var(--accent); font-size: 2.2rem; margin: 0 0 10px 0; }
-        button { padding: 14px; border-radius: 15px; border: none; font-family: 'Bungee'; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
-        .btn-main { background: var(--accent); color: #2d0a0a; width: 100%; box-shadow: 0 4px 0 #b38f00; }
-        .btn-main:active { transform: translateY(3px); box-shadow: none; }
-        .btn-sec { background: rgba(255, 255, 255, 0.1); color: white; width: 100%; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .btn-back { background: var(--red); color: white; }
+        .logo { font-family: 'Bungee'; color: var(--accent); font-size: 2.2rem; margin: 0; text-shadow: 0 0 15px var(--accent); }
+        button { padding: 15px; border-radius: 15px; border: none; font-family: 'Bungee'; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
+        .btn-main { background: var(--accent); color: #0a0a12; width: 100%; box-shadow: 0 4px 0 #0099cc; }
+        .btn-sec { background: transparent; border: 1px solid var(--accent); color: white; width: 100%; }
+        .btn-exit { background: var(--red); color: white; margin-top: 10px; width: 60%; align-self: center; font-size: 0.7rem; }
 
-        /* 50+ Grid Layout */
-        #game-canvas { 
-            display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start;
-            gap: 12px; height: 280px; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 15px; 
-            border: 2px solid rgba(255,204,0,0.3); margin-bottom: 10px; overflow-y: auto;
-        }
-        .player-box { width: 65px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 85px; }
+        /* GAME VISUALS */
+        #personal-status { height: 160px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .sun { background: radial-gradient(circle, #fff, var(--gold), #ff4e00); border-radius: 50%; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .sun.glow { animation: pulse-gold 1.5s infinite; }
+        .bat-shell { width: 45px; height: 110px; border: 3px solid #fff; border-radius: 10px; position: relative; overflow: hidden; }
+        .bat-fill { background: linear-gradient(to top, #00f2fe, #4facfe); width: 100%; position: absolute; bottom: 0; transition: height 0.7s ease-out; }
+        .pizza-plate { width: 120px; height: 120px; background: #f3e5ab; border: 6px solid #8b4513; border-radius: 50%; position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); }
+        .topping { position: absolute; font-size: 24px; animation: pizza-drop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-        /* Game Assets */
-        .sun { background: radial-gradient(circle, #fff, var(--accent), #ff8800); border-radius: 50%; transition: 0.4s; }
-        .bat-shell { width: 18px; height: 45px; border: 2px solid white; border-radius: 4px; position: relative; }
-        .bat-fill { background: var(--accent); width: 100%; position: absolute; bottom: 0; transition: 0.5s; }
-        .pizza-plate { width: 42px; height: 42px; background: #f3e5ab; border: 2px solid #d2691e; border-radius: 50%; display: flex; flex-wrap: wrap; padding: 2px; justify-content: center; align-items: center; }
-        .topping { font-size: 9px; margin: -1px; }
-
-        .p-name { font-size: 0.55rem; color: var(--accent); font-weight: 900; margin-top: 5px; text-transform: uppercase; white-space: nowrap; overflow: hidden; width: 100%; }
-        
-        /* Quiz Interface */
         .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        input { padding: 12px; border-radius: 10px; border: 2px solid #555; background: #000; color: #fff; text-align: center; }
-        .leaderboard { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; }
-        .leaderboard td { padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        input { padding: 12px; border-radius: 10px; border: 1px solid var(--accent); background: rgba(0,0,0,0.3); color: #fff; text-align: center; }
+        .leaderboard { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.75rem; text-align: left; }
     </style>
 </head>
-<body>
+<body id="master-body">
 
     <div class="card" id="main-card">
         <h1 class="logo">QUIRIOSITY</h1>
@@ -94,64 +53,63 @@
         </div>
 
         <div id="view-lib" class="view">
-            <h3 style="margin:0">YOUR QUESTION SETS</h3>
             <div id="topics"></div>
-            <button class="btn-main" onclick="addTopic()">+ CREATE NEW FOLDER</button>
-            <button class="btn-sec" onclick="showView('view-home')">BACK TO START</button>
+            <button class="btn-main" onclick="addTopic()">+ CREATE FOLDER</button>
+            <button class="btn-sec" onclick="showView('view-home')">BACK</button>
         </div>
 
         <div id="view-edit" class="view">
-            <h3 id="edit-title" style="margin:0; color:var(--accent)">EDITOR</h3>
-            <div id="questions-list" style="max-height: 130px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius:10px;"></div>
+            <h3 id="edit-title" style="color:var(--accent); margin:0;">EDITOR</h3>
+            <div id="questions-list" style="max-height: 120px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius:10px; font-size: 0.8rem;"></div>
             <button class="btn-sec" onclick="addHybridQuestion()">+ ADD QUESTION</button>
-            
-            <label style="font-size: 0.7rem; text-align: left; display: block; margin-top: 5px;">RESEARCH MODE:</label>
-            <select id="game-select" style="padding:10px; border-radius:10px; background:#000; color:#fff; border:1px solid var(--accent);">
-                <option value="forge">☀️ SOLAR FORGE (Growth)</option>
-                <option value="battery">🔋 POWER CELL (Completion)</option>
-                <option value="pizza">🍕 PIZZA PARTY (Collection)</option>
+            <select id="game-select" style="padding:12px; border-radius:10px; background:#000; color:#fff; border:1px solid var(--accent);">
+                <option value="forge">☀️ SOLAR FORGE (Glow & Grow)</option>
+                <option value="battery">🔋 POWER CELL (Smooth Charge)</option>
+                <option value="pizza">🍕 PIZZA PARTY (Drop Toppings)</option>
             </select>
-            
-            <input type="number" id="room-code" placeholder="ENTER ROOM CODE (e.g. 1122)">
+            <input type="number" id="room-code" placeholder="ROOM CODE">
             <button class="btn-main" onclick="hostGame()">LAUNCH ARENA</button>
-            <button class="btn-sec" onclick="showView('view-lib')">BACK TO LIBRARY</button>
+            <button class="btn-sec" onclick="showView('view-lib')">BACK</button>
         </div>
 
         <div id="view-stu-login" class="view">
             <input type="text" id="stu-name" placeholder="NICKNAME">
             <input type="number" id="join-code" placeholder="ROOM CODE">
-            <button class="btn-main" onclick="joinGame()">CONNECT TO TEACHER</button>
+            <button class="btn-main" onclick="joinGame()">ENTER ROOM</button>
             <button class="btn-sec" onclick="showView('view-home')">BACK</button>
         </div>
 
         <div id="view-arena" class="view">
-            <div id="game-canvas"></div>
+            <div id="personal-status"></div>
             
             <div id="quiz-zone" style="display:none;">
-                <p id="q-text" style="font-weight: 900; font-size: 1.1rem; margin-bottom:15px;"></p>
+                <p id="q-text" style="font-weight: 900; font-size: 1.1rem; margin-bottom: 15px;"></p>
                 <div id="mcq-zone" class="choice-grid"></div>
                 <div id="type-zone" style="display:none;">
-                    <input type="text" id="ans-input" placeholder="Type your answer...">
+                    <input type="text" id="ans-input" placeholder="Type answer...">
                     <button class="btn-main" onclick="checkTypedAnswer()" style="margin-top:10px">SUBMIT</button>
                 </div>
+                <button class="btn-exit" onclick="location.reload()">LEAVE GAME</button>
             </div>
 
             <div id="teacher-results" style="display:none;">
+                <h4 style="margin:0; color:var(--accent);">RESEARCH DATA (LIVE)</h4>
+                <div id="host-grid" style="display:flex; flex-wrap:wrap; gap:5px; margin: 10px 0; font-size: 0.6rem; justify-content:center;"></div>
                 <table class="leaderboard"><tbody id="leaderboard-body"></tbody></table>
-                <button class="btn-back" onclick="exitArena()" style="margin-top:15px">EXIT ARENA</button>
+                <button class="btn-exit" onclick="location.reload()">CLOSE ARENA</button>
             </div>
 
             <button id="start-btn" class="btn-main" style="display:none;" onclick="teacherStart()">START ALL STUDENTS</button>
-            <p id="student-wait-msg" style="display:none;">Connected! Waiting for teacher to start...</p>
+            <p id="wait-msg" style="display:none;">Connecting to host...</p>
         </div>
     </div>
 
     <script>
         let peer, conn, myRole, currentTopic, roomCode, selectedMode;
-        let db = JSON.parse(localStorage.getItem('quiriosity_final_v1')) || {}; 
+        let db = JSON.parse(localStorage.getItem('quiriosity_master_v1')) || {}; 
         let players = {}; 
-        let playerCorrectCount = {}; 
-        const toppings = ['🍕','🍄','🫑','🧅','🥓','🍍'];
+        let playerCorrectCount = {};
+        const toppings = ['🍕','🍄','🫑','🧅','🥓','🍍','🌶️','🧀','🍗'];
 
         function showView(id) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -159,10 +117,9 @@
             if(id === 'view-lib') renderLib();
         }
 
-        /* LIBRARY LOGIC */
+        /* DATA MANAGEMENT */
         function renderLib() {
             const div = document.getElementById('topics'); div.innerHTML = '';
-            if(Object.keys(db).length === 0) div.innerHTML = '<p style="font-size:0.8rem; opacity:0.5;">No sets created yet.</p>';
             Object.keys(db).forEach(t => {
                 div.innerHTML += `<div style="display:flex; gap:5px; margin-bottom:5px;">
                     <button class="btn-sec" onclick="openTopic('${t}')" style="flex:1; text-align:left;">📂 ${t}</button>
@@ -170,97 +127,96 @@
                 </div>`;
             });
         }
-        function addTopic() { let n = prompt("Enter Module Name:"); if(n){ db[n]=[]; save(); renderLib(); }}
-        function deleteTopic(t) { if(confirm("Delete this set?")){ delete db[t]; save(); renderLib(); }}
+        function addTopic() { let n = prompt("Folder Name?"); if(n){ db[n]=[]; save(); renderLib(); }}
+        function deleteTopic(t) { if(confirm("Delete set?")){ delete db[t]; save(); renderLib(); }}
         function openTopic(t) { currentTopic = t; document.getElementById('edit-title').innerText = t; renderQuestions(); showView('view-edit'); }
         function renderQuestions() {
             const div = document.getElementById('questions-list'); div.innerHTML = '';
-            db[currentTopic].forEach(q => { div.innerHTML += `<div style="font-size:0.75rem; border-bottom:1px solid #666; padding:5px;">${q.q}</div>`; });
+            db[currentTopic].forEach(q => { div.innerHTML += `<div style="padding:4px; border-bottom:1px solid #333;">${q.q}</div>`; });
         }
         function addHybridQuestion() {
-            let q = prompt("Question:"), a = prompt("Correct Answer:"), w = prompt("Wrong options (comma separated for multiple choice) or leave blank:");
+            let q = prompt("Question:"), a = prompt("Answer:"), w = prompt("Wrong (comma-separated):");
             if(q && a){
                 let opts = w ? w.split(',').concat(a).sort(() => Math.random() - 0.5) : [];
-                db[currentTopic].push({q, a, options: opts}); 
-                save(); renderQuestions(); 
+                db[currentTopic].push({q, a, options: opts}); save(); renderQuestions();
             }
         }
-        function save() { localStorage.setItem('quiriosity_final_v1', JSON.stringify(db)); }
+        function save() { localStorage.setItem('quiriosity_master_v1', JSON.stringify(db)); }
 
-        /* HOST (TEACHER) LOGIC */
+        /* HOST (TEACHER) */
         function hostGame() {
             roomCode = document.getElementById('room-code').value;
             selectedMode = document.getElementById('game-select').value;
-            if(!roomCode) return alert("Please enter a room code!");
-            
             peer = new Peer('q-' + roomCode);
-            peer.on('open', () => {
-                myRole = 'host';
-                showView('view-arena');
-                document.getElementById('start-btn').style.display='block';
-            });
+            peer.on('open', () => { myRole='host'; showView('view-arena'); document.getElementById('start-btn').style.display='block'; });
             peer.on('connection', c => {
                 c.on('data', d => {
-                    if(d.type==='join'){ 
-                        players[d.name]=0; 
-                        playerCorrectCount[d.name]=0; 
-                        broadcastArena(); 
-                    }
+                    if(d.type==='join'){ players[d.name]=0; playerCorrectCount[d.name]=0; sync(); }
                     if(d.type==='score'){
                         if(d.correct) { players[d.name]++; playerCorrectCount[d.name]++; }
-                        else { players[d.name]--; if(players[d.name]<0) players[d.name]=0; }
-                        broadcastArena();
-                        updateLeaderboard();
+                        else players[d.name] = Math.max(0, players[d.name]-1);
+                        sync(); updateHostStats();
                     }
                 });
             });
-            peer.on('error', () => alert("Room Code taken! Try another."));
         }
-
         function teacherStart() {
             document.getElementById('teacher-results').style.display='block';
             document.getElementById('start-btn').style.display='none';
-            Object.values(peer.connections).forEach(conns => {
-                conns.forEach(c => c.send({type:'start', questions: db[currentTopic]}));
-            });
+            Object.values(peer.connections).forEach(conns => conns.forEach(c => c.send({type:'start', questions: db[currentTopic]})));
+        }
+        function updateHostStats() {
+            const grid = document.getElementById('host-grid'), body = document.getElementById('leaderboard-body');
+            grid.innerHTML = ''; body.innerHTML = '';
+            for(let p in players) grid.innerHTML += `<span style="background:var(--accent); color:#000; padding:2px 5px; border-radius:4px;">${p}:${players[p]}</span>`;
+            let sorted = Object.keys(playerCorrectCount).sort((a,b) => playerCorrectCount[b] - playerCorrectCount[a]);
+            sorted.forEach((n, i) => body.innerHTML += `<tr><td>#${i+1}</td><td>${n}</td><td>${playerCorrectCount[n]} Cor.</td></tr>`);
         }
 
-        function exitArena() {
-            if(confirm("Exit the session? This will stop tracking for this round.")){
-                location.reload(); 
-            }
-        }
-
-        /* STUDENT LOGIC */
+        /* STUDENT */
         function joinGame() {
-            let n = document.getElementById('stu-name').value;
-            let c = document.getElementById('join-code').value;
-            if(!n || !c) return alert("Enter nickname and code!");
-            
+            let n = document.getElementById('stu-name').value, c = document.getElementById('join-code').value;
             peer = new Peer();
             peer.on('open', () => {
                 conn = peer.connect('q-' + c);
                 conn.on('open', () => {
-                    myRole='student';
-                    showView('view-arena');
-                    document.getElementById('student-wait-msg').style.display='block';
+                    myRole='student'; showView('view-arena');
+                    document.getElementById('wait-msg').style.display='block';
                     conn.send({type:'join', name: n});
                 });
                 conn.on('data', d => {
                     if(d.type==='start') startQuiz(d.questions, n);
-                    if(d.type==='sync') { players = d.players; selectedMode = d.mode; updateArenaUI(); }
+                    if(d.type==='sync') updateStudentFX(d.players[n], d.mode);
                 });
             });
+        }
+        function updateStudentFX(score, mode) {
+            const box = document.getElementById('personal-status');
+            if(score === undefined) score = 0;
+            if(mode === 'forge') {
+                let s = 60 + (score * 15);
+                box.innerHTML = `<div class="sun ${score>0?'glow':''}" style="width:${s}px; height:${s}px; box-shadow: 0 0 ${score*15}px var(--gold);"></div>`;
+            } else if(mode === 'battery') {
+                box.innerHTML = `<div class="bat-shell"><div class="bat-fill" style="height:${Math.min(score*10, 100)}%;"></div></div>`;
+            } else {
+                if(!box.querySelector('.pizza-plate')) box.innerHTML = `<div class="pizza-plate"></div>`;
+                const plate = box.querySelector('.pizza-plate');
+                if(plate.children.length < score) {
+                    let top = document.createElement('span'); top.className = 'topping';
+                    top.innerText = toppings[Math.floor(Math.random()*toppings.length)];
+                    top.style.left = Math.random()*85 + "px"; top.style.top = Math.random()*85 + "px";
+                    plate.appendChild(top);
+                } else if (score < plate.children.length) { plate.innerHTML = ''; }
+            }
         }
 
         let currentQIdx = 0, stuQs = [], stuName = "", finalCorrect = 0;
         function startQuiz(qs, name) {
             stuQs = qs; stuName = name; currentQIdx = 0; finalCorrect = 0;
-            document.getElementById('student-wait-msg').style.display='none';
+            document.getElementById('wait-msg').style.display='none';
             document.getElementById('quiz-zone').style.display='block';
             nextQ();
         }
-
         function nextQ() {
             if(currentQIdx < stuQs.length) {
                 document.getElementById('q-text').innerText = stuQs[currentQIdx].q;
@@ -268,67 +224,26 @@
                 if(stuQs[currentQIdx].options.length > 0) {
                     mZone.style.display = 'grid'; tZone.style.display = 'none'; mZone.innerHTML = '';
                     stuQs[currentQIdx].options.forEach(opt => {
-                        let b = document.createElement('button'); b.className='btn-main'; b.innerText=opt;
-                        b.onclick=()=>check(opt); mZone.appendChild(b);
+                        let b = document.createElement('button'); b.className='btn-main'; b.innerText=opt; b.onclick=()=>check(opt); mZone.appendChild(b);
                     });
                 } else { mZone.style.display = 'none'; tZone.style.display = 'block'; document.getElementById('ans-input').value = ''; }
-            } else {
-                document.getElementById('quiz-zone').innerHTML = `<h2>COMPLETED</h2><h1>Score: ${finalCorrect}</h1><p>Check the teacher's screen!</p>`;
-            }
+            } else { document.getElementById('quiz-zone').innerHTML = `<h2>MODULE FINISHED</h2><h1>Score: ${finalCorrect}</h1><button class="btn-main" onclick="location.reload()">MAIN MENU</button>`; }
         }
-
         function check(val) {
             let isCorrect = val.trim().toLowerCase() == stuQs[currentQIdx].a.trim().toLowerCase();
+            conn.send({type:'score', name: stuName, correct: isCorrect});
             if(isCorrect) { 
                 finalCorrect++; 
-                conn.send({type:'score', name: stuName, correct: true}); 
+                document.getElementById('main-card').classList.add('correct-flash'); 
+                setTimeout(()=>document.getElementById('main-card').classList.remove('correct-flash'), 500); 
             } else {
-                conn.send({type:'score', name: stuName, correct: false});
-                document.getElementById('main-card').classList.add('shake');
-                setTimeout(() => document.getElementById('main-card').classList.remove('shake'), 400);
+                document.getElementById('main-card').style.borderColor = "var(--red)";
+                setTimeout(()=>document.getElementById('main-card').style.borderColor = "rgba(0,242,254,0.2)", 400);
             }
-            currentQIdx++;
-            setTimeout(nextQ, 600);
+            currentQIdx++; setTimeout(nextQ, 700);
         }
-
         function checkTypedAnswer() { check(document.getElementById('ans-input').value); }
-
-        /* UI REFRESH LOGIC */
-        function broadcastArena() {
-            updateArenaUI();
-            if(myRole === 'host' && peer) {
-                Object.values(peer.connections).forEach(conns => {
-                    conns.forEach(c => c.send({type: 'sync', players: players, mode: selectedMode}));
-                });
-            }
-        }
-
-        function updateArenaUI() {
-            const canvas = document.getElementById('game-canvas'); canvas.innerHTML = '';
-            for(let p in players) {
-                let box = document.createElement('div'); box.className = 'player-box';
-                let score = players[p];
-                if(selectedMode === 'forge') {
-                    let s = 15 + (score * 5); 
-                    box.innerHTML = `<div class="sun" style="width:${s}px; height:${s}px; box-shadow: 0 0 ${score*4}px var(--accent)"></div>`;
-                } else if(selectedMode === 'battery') {
-                    box.innerHTML = `<div class="bat-shell"><div class="bat-fill" style="height:${Math.min(score*10, 100)}%"></div></div>`;
-                } else {
-                    let tStr = ''; for(let i=0; i<score; i++) { tStr += `<span class="topping">${toppings[i%toppings.length]}</span>`; }
-                    box.innerHTML = `<div class="pizza-plate">${tStr}</div>`;
-                }
-                box.innerHTML += `<span class="p-name">${p}</span>`;
-                canvas.appendChild(box);
-            }
-        }
-
-        function updateLeaderboard() {
-            let body = document.getElementById('leaderboard-body'); body.innerHTML = '';
-            let sorted = Object.keys(playerCorrectCount).sort((a,b) => playerCorrectCount[b] - playerCorrectCount[a]);
-            sorted.forEach((name, i) => {
-                body.innerHTML += `<tr><td>#${i+1}</td><td>${name}</td><td>${playerCorrectCount[name]} Correct</td></tr>`;
-            });
-        }
+        function sync() { Object.values(peer.connections).forEach(conns => conns.forEach(c => c.send({type:'sync', players: players, mode: selectedMode}))); }
     </script>
 </body>
 </html>
