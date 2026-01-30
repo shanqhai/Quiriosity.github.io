@@ -7,30 +7,67 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;900&family=Bungee&display=swap');
-        :root { --bg: #2d0a0a; --card: #4a0e0e; --accent: #ffcc00; --red: #ff4757; --text: #ffffff; }
         
-        body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        .card { background: var(--card); border-radius: 30px; padding: 20px; width: 95%; max-width: 550px; text-align: center; border: 4px solid var(--accent); box-shadow: 0 0 30px rgba(255, 204, 0, 0.2); max-height: 95vh; overflow-y: auto; }
+        :root { 
+            --bg: #2d0a0a; 
+            --card: #4a0e0e; 
+            --accent: #ffcc00; 
+            --red: #ff4757; 
+            --text: #ffffff; 
+        }
         
-        .view { display: none; flex-direction: column; gap: 12px; }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Outfit', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow: hidden; 
+        }
+
+        .card { 
+            background: var(--card); 
+            border-radius: 30px; 
+            padding: 25px; 
+            width: 95%; 
+            max-width: 550px; 
+            text-align: center; 
+            border: 4px solid var(--accent); 
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.2); 
+            max-height: 92vh; 
+            overflow-y: auto; 
+            position: relative;
+        }
+        
+        /* Views */
+        .view { display: none; flex-direction: column; gap: 15px; }
         .active { display: flex; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
         
+        /* Feedback */
         .shake { animation: shake 0.4s; border: 4px solid var(--red) !important; }
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-8px);} 75% {transform: translateX(8px);} }
 
-        .logo { font-family: 'Bungee'; color: var(--accent); font-size: 2.2rem; margin: 0; letter-spacing: 2px; }
-        button { padding: 14px; border-radius: 15px; border: none; font-family: 'Bungee'; cursor: pointer; transition: 0.2s; }
+        /* Branding & Buttons */
+        .logo { font-family: 'Bungee'; color: var(--accent); font-size: 2.2rem; margin: 0 0 10px 0; }
+        button { padding: 14px; border-radius: 15px; border: none; font-family: 'Bungee'; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
         .btn-main { background: var(--accent); color: #2d0a0a; width: 100%; box-shadow: 0 4px 0 #b38f00; }
+        .btn-main:active { transform: translateY(3px); box-shadow: none; }
         .btn-sec { background: rgba(255, 255, 255, 0.1); color: white; width: 100%; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .btn-back { background: var(--red); color: white; }
 
+        /* 50+ Grid Layout */
         #game-canvas { 
             display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start;
-            gap: 12px; height: 300px; background: rgba(0,0,0,0.4); border-radius: 20px; padding: 15px; 
-            border: 2px solid var(--accent); margin-bottom: 10px; overflow-y: auto;
+            gap: 12px; height: 280px; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 15px; 
+            border: 2px solid rgba(255,204,0,0.3); margin-bottom: 10px; overflow-y: auto;
         }
         .player-box { width: 65px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 85px; }
 
+        /* Game Assets */
         .sun { background: radial-gradient(circle, #fff, var(--accent), #ff8800); border-radius: 50%; transition: 0.4s; }
         .bat-shell { width: 18px; height: 45px; border: 2px solid white; border-radius: 4px; position: relative; }
         .bat-fill { background: var(--accent); width: 100%; position: absolute; bottom: 0; transition: 0.5s; }
@@ -38,9 +75,12 @@
         .topping { font-size: 9px; margin: -1px; }
 
         .p-name { font-size: 0.55rem; color: var(--accent); font-weight: 900; margin-top: 5px; text-transform: uppercase; white-space: nowrap; overflow: hidden; width: 100%; }
+        
+        /* Quiz Interface */
         .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        input { padding: 12px; border-radius: 10px; border: 2px solid #555; background: #000; color: #fff; text-align: center; }
         .leaderboard { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; }
-        .leaderboard td { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 5px; }
+        .leaderboard td { padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -54,94 +94,213 @@
         </div>
 
         <div id="view-lib" class="view">
+            <h3 style="margin:0">YOUR QUESTION SETS</h3>
             <div id="topics"></div>
-            <button class="btn-main" onclick="addTopic()">+ NEW QUESTION SET</button>
-            <button class="btn-sec" onclick="showView('view-home')">BACK</button>
+            <button class="btn-main" onclick="addTopic()">+ CREATE NEW FOLDER</button>
+            <button class="btn-sec" onclick="showView('view-home')">BACK TO START</button>
         </div>
 
         <div id="view-edit" class="view">
-            <h3 id="edit-title">EDITOR</h3>
-            <div id="questions-list" style="max-height: 150px; overflow-y: auto;"></div>
+            <h3 id="edit-title" style="margin:0; color:var(--accent)">EDITOR</h3>
+            <div id="questions-list" style="max-height: 130px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius:10px;"></div>
             <button class="btn-sec" onclick="addHybridQuestion()">+ ADD QUESTION</button>
-            <select id="game-select" style="padding:10px; border-radius:10px; background:#000; color:#fff;">
-                <option value="forge">☀️ SOLAR FORGE</option>
-                <option value="battery">🔋 POWER CELL</option>
-                <option value="pizza">🍕 PIZZA PARTY</option>
+            
+            <label style="font-size: 0.7rem; text-align: left; display: block; margin-top: 5px;">RESEARCH MODE:</label>
+            <select id="game-select" style="padding:10px; border-radius:10px; background:#000; color:#fff; border:1px solid var(--accent);">
+                <option value="forge">☀️ SOLAR FORGE (Growth)</option>
+                <option value="battery">🔋 POWER CELL (Completion)</option>
+                <option value="pizza">🍕 PIZZA PARTY (Collection)</option>
             </select>
-            <input type="number" id="room-code" placeholder="ROOM CODE">
+            
+            <input type="number" id="room-code" placeholder="ENTER ROOM CODE (e.g. 1122)">
             <button class="btn-main" onclick="hostGame()">LAUNCH ARENA</button>
+            <button class="btn-sec" onclick="showView('view-lib')">BACK TO LIBRARY</button>
         </div>
 
         <div id="view-stu-login" class="view">
             <input type="text" id="stu-name" placeholder="NICKNAME">
             <input type="number" id="join-code" placeholder="ROOM CODE">
-            <button class="btn-main" onclick="joinGame()">ENTER GAME</button>
+            <button class="btn-main" onclick="joinGame()">CONNECT TO TEACHER</button>
+            <button class="btn-sec" onclick="showView('view-home')">BACK</button>
         </div>
 
         <div id="view-arena" class="view">
             <div id="game-canvas"></div>
+            
             <div id="quiz-zone" style="display:none;">
-                <p id="q-text" style="font-weight: 900; font-size: 1.2rem; margin: 10px 0;"></p>
+                <p id="q-text" style="font-weight: 900; font-size: 1.1rem; margin-bottom:15px;"></p>
                 <div id="mcq-zone" class="choice-grid"></div>
                 <div id="type-zone" style="display:none;">
-                    <input type="text" id="ans-input" placeholder="Your answer...">
+                    <input type="text" id="ans-input" placeholder="Type your answer...">
                     <button class="btn-main" onclick="checkTypedAnswer()" style="margin-top:10px">SUBMIT</button>
                 </div>
             </div>
+
             <div id="teacher-results" style="display:none;">
                 <table class="leaderboard"><tbody id="leaderboard-body"></tbody></table>
+                <button class="btn-back" onclick="exitArena()" style="margin-top:15px">EXIT ARENA</button>
             </div>
-            <button id="start-btn" class="btn-main" style="display:none;" onclick="teacherStart()">START ALL</button>
-            <p id="student-wait-msg" style="display:none;">Connected. Waiting for host...</p>
+
+            <button id="start-btn" class="btn-main" style="display:none;" onclick="teacherStart()">START ALL STUDENTS</button>
+            <p id="student-wait-msg" style="display:none;">Connected! Waiting for teacher to start...</p>
         </div>
     </div>
 
     <script>
         let peer, conn, myRole, currentTopic, roomCode, selectedMode;
-        let db = JSON.parse(localStorage.getItem('quiriosity_research_v1')) || {}; 
+        let db = JSON.parse(localStorage.getItem('quiriosity_final_v1')) || {}; 
         let players = {}; 
         let playerCorrectCount = {}; 
         const toppings = ['🍕','🍄','🫑','🧅','🥓','🍍'];
 
-        function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function showView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'view-lib') renderLib();
+        }
+
+        /* LIBRARY LOGIC */
         function renderLib() {
             const div = document.getElementById('topics'); div.innerHTML = '';
+            if(Object.keys(db).length === 0) div.innerHTML = '<p style="font-size:0.8rem; opacity:0.5;">No sets created yet.</p>';
             Object.keys(db).forEach(t => {
-                div.innerHTML += `<div style="display:flex; gap:5px; margin-bottom:5px;"><button class="btn-sec" onclick="openTopic('${t}')" style="flex:1; text-align:left;">📂 ${t}</button></div>`;
+                div.innerHTML += `<div style="display:flex; gap:5px; margin-bottom:5px;">
+                    <button class="btn-sec" onclick="openTopic('${t}')" style="flex:1; text-align:left;">📂 ${t}</button>
+                    <button onclick="deleteTopic('${t}')" style="background:none; border:none; color:var(--red); font-weight:bold; cursor:pointer;">X</button>
+                </div>`;
             });
         }
+        function addTopic() { let n = prompt("Enter Module Name:"); if(n){ db[n]=[]; save(); renderLib(); }}
+        function deleteTopic(t) { if(confirm("Delete this set?")){ delete db[t]; save(); renderLib(); }}
         function openTopic(t) { currentTopic = t; document.getElementById('edit-title').innerText = t; renderQuestions(); showView('view-edit'); }
         function renderQuestions() {
             const div = document.getElementById('questions-list'); div.innerHTML = '';
-            db[currentTopic].forEach((q, i) => { div.innerHTML += `<div style="font-size:0.75rem; padding:8px; background:rgba(0,0,0,0.2); margin-bottom:4px; border-radius:8px;">${q.q}</div>`; });
+            db[currentTopic].forEach(q => { div.innerHTML += `<div style="font-size:0.75rem; border-bottom:1px solid #666; padding:5px;">${q.q}</div>`; });
         }
-        function addTopic() { let n = prompt("Set Title?"); if(n){ db[n]=[]; save(); renderLib(); }}
         function addHybridQuestion() {
-            let q = prompt("Question:"), a = prompt("Answer:"), w = prompt("Wrong options (comma separated):");
-            let opts = w ? w.split(',').concat(a).sort(() => Math.random() - 0.5) : [];
-            if(q && a){ db[currentTopic].push({q, a, options: opts}); save(); renderQuestions(); }
+            let q = prompt("Question:"), a = prompt("Correct Answer:"), w = prompt("Wrong options (comma separated):");
+            if(q && a){
+                let opts = w ? w.split(',').concat(a).sort(() => Math.random() - 0.5) : [];
+                db[currentTopic].push({q, a, options: opts}); 
+                save(); renderQuestions(); 
+            }
         }
-        function save() { localStorage.setItem('quiriosity_research_v1', JSON.stringify(db)); }
+        function save() { localStorage.setItem('quiriosity_final_v1', JSON.stringify(db)); }
 
+        /* HOST (TEACHER) LOGIC */
         function hostGame() {
             roomCode = document.getElementById('room-code').value;
             selectedMode = document.getElementById('game-select').value;
+            if(!roomCode) return alert("Please enter a room code!");
+            
             peer = new Peer('q-' + roomCode);
-            peer.on('open', () => { myRole = 'host'; showView('view-arena'); document.getElementById('start-btn').style.display='block'; });
-            peer.on('connection', c => { c.on('data', d => { 
-                if(d.type==='join'){ players[d.name]=0; playerCorrectCount[d.name]=0; broadcastArena(); } 
-                if(d.type==='score'){ 
-                    if(d.correct) { players[d.name]++; playerCorrectCount[d.name]++; } 
-                    else { players[d.name]--; if(players[d.name]<0) players[d.name]=0; }
-                    broadcastArena(); updateLeaderboard();
-                } 
-            }); });
+            peer.on('open', () => {
+                myRole = 'host';
+                showView('view-arena');
+                document.getElementById('start-btn').style.display='block';
+            });
+            peer.on('connection', c => {
+                c.on('data', d => {
+                    if(d.type==='join'){ 
+                        players[d.name]=0; 
+                        playerCorrectCount[d.name]=0; 
+                        broadcastArena(); 
+                    }
+                    if(d.type==='score'){
+                        if(d.correct) { players[d.name]++; playerCorrectCount[d.name]++; }
+                        else { players[d.name]--; if(players[d.name]<0) players[d.name]=0; }
+                        broadcastArena();
+                        updateLeaderboard();
+                    }
+                });
+            });
+            peer.on('error', () => alert("Room Code taken! Try another."));
         }
 
-        function updateLeaderboard() {
-            let body = document.getElementById('leaderboard-body'); body.innerHTML = '';
-            let sorted = Object.keys(playerCorrectCount).sort((a,b) => playerCorrectCount[b] - playerCorrectCount[a]);
-            sorted.forEach((name, i) => { body.innerHTML += `<tr><td>#${i+1}</td><td>${name}</td><td>${playerCorrectCount[name]} Correct</td></tr>`; });
+        function teacherStart() {
+            document.getElementById('teacher-results').style.display='block';
+            document.getElementById('start-btn').style.display='none';
+            Object.values(peer.connections).forEach(conns => {
+                conns.forEach(c => c.send({type:'start', questions: db[currentTopic]}));
+            });
+        }
+
+        function exitArena() {
+            if(confirm("Exit the session? This will stop tracking for this round.")){
+                location.reload(); 
+            }
+        }
+
+        /* STUDENT LOGIC */
+        function joinGame() {
+            let n = document.getElementById('stu-name').value;
+            let c = document.getElementById('join-code').value;
+            if(!n || !c) return alert("Enter nickname and code!");
+            
+            peer = new Peer();
+            peer.on('open', () => {
+                conn = peer.connect('q-' + c);
+                conn.on('open', () => {
+                    myRole='student';
+                    showView('view-arena');
+                    document.getElementById('student-wait-msg').style.display='block';
+                    conn.send({type:'join', name: n});
+                });
+                conn.on('data', d => {
+                    if(d.type==='start') startQuiz(d.questions, n);
+                    if(d.type==='sync') { players = d.players; selectedMode = d.mode; updateArenaUI(); }
+                });
+            });
+        }
+
+        let currentQIdx = 0, stuQs = [], stuName = "", finalCorrect = 0;
+        function startQuiz(qs, name) {
+            stuQs = qs; stuName = name; currentQIdx = 0; finalCorrect = 0;
+            document.getElementById('student-wait-msg').style.display='none';
+            document.getElementById('quiz-zone').style.display='block';
+            nextQ();
+        }
+
+        function nextQ() {
+            if(currentQIdx < stuQs.length) {
+                document.getElementById('q-text').innerText = stuQs[currentQIdx].q;
+                const mZone = document.getElementById('mcq-zone'), tZone = document.getElementById('type-zone');
+                if(stuQs[currentQIdx].options.length > 0) {
+                    mZone.style.display = 'grid'; tZone.style.display = 'none'; mZone.innerHTML = '';
+                    stuQs[currentQIdx].options.forEach(opt => {
+                        let b = document.createElement('button'); b.className='btn-main'; b.innerText=opt;
+                        b.onclick=()=>check(opt); mZone.appendChild(b);
+                    });
+                } else { mZone.style.display = 'none'; tZone.style.display = 'block'; document.getElementById('ans-input').value = ''; }
+            } else {
+                document.getElementById('quiz-zone').innerHTML = `<h2>COMPLETED</h2><h1>Score: ${finalCorrect}</h1><p>Check the teacher's screen!</p>`;
+            }
+        }
+
+        function check(val) {
+            let isCorrect = val.trim().toLowerCase() == stuQs[currentQIdx].a.trim().toLowerCase();
+            if(isCorrect) { 
+                finalCorrect++; 
+                conn.send({type:'score', name: stuName, correct: true}); 
+            } else {
+                conn.send({type:'score', name: stuName, correct: false});
+                document.getElementById('main-card').classList.add('shake');
+                setTimeout(() => document.getElementById('main-card').classList.remove('shake'), 400);
+            }
+            currentQIdx++;
+            setTimeout(nextQ, 600);
+        }
+
+        function checkTypedAnswer() { check(document.getElementById('ans-input').value); }
+
+        /* UI REFRESH LOGIC */
+        function broadcastArena() {
+            updateArenaUI();
+            if(myRole === 'host' && peer) {
+                Object.values(peer.connections).forEach(conns => {
+                    conns.forEach(c => c.send({type: 'sync', players: players, mode: selectedMode}));
+                });
+            }
         }
 
         function updateArenaUI() {
@@ -150,7 +309,8 @@
                 let box = document.createElement('div'); box.className = 'player-box';
                 let score = players[p];
                 if(selectedMode === 'forge') {
-                    let s = 15 + (score * 5); box.innerHTML = `<div class="sun" style="width:${s}px; height:${s}px; box-shadow: 0 0 ${score*4}px var(--accent)"></div>`;
+                    let s = 15 + (score * 5); 
+                    box.innerHTML = `<div class="sun" style="width:${s}px; height:${s}px; box-shadow: 0 0 ${score*4}px var(--accent)"></div>`;
                 } else if(selectedMode === 'battery') {
                     box.innerHTML = `<div class="bat-shell"><div class="bat-fill" style="height:${Math.min(score*10, 100)}%"></div></div>`;
                 } else {
@@ -162,45 +322,13 @@
             }
         }
 
-        function broadcastArena() {
-            updateArenaUI();
-            if(myRole === 'host') {
-                Object.values(peer.connections).forEach(conns => { conns.forEach(c => c.send({type: 'sync', players: players, mode: selectedMode})); });
-            }
-        }
-
-        function joinGame() {
-            let n = document.getElementById('stu-name').value, c = document.getElementById('join-code').value;
-            peer = new Peer();
-            peer.on('open', () => {
-                conn = peer.connect('q-' + c);
-                conn.on('open', () => { myRole='student'; showView('view-arena'); document.getElementById('student-wait-msg').style.display='block'; conn.send({type:'join', name: n}); });
-                conn.on('data', d => { if(d.type==='start') startQuiz(d.questions, n); if(d.type==='sync') { players = d.players; selectedMode = d.mode; updateArenaUI(); } });
+        function updateLeaderboard() {
+            let body = document.getElementById('leaderboard-body'); body.innerHTML = '';
+            let sorted = Object.keys(playerCorrectCount).sort((a,b) => playerCorrectCount[b] - playerCorrectCount[a]);
+            sorted.forEach((name, i) => {
+                body.innerHTML += `<tr><td>#${i+1}</td><td>${name}</td><td>${playerCorrectCount[name]} Correct</td></tr>`;
             });
         }
-
-        let currentQIdx = 0, stuQs = [], stuName = "", finalCorrect = 0;
-        function startQuiz(qs, name) { stuQs = qs; stuName = name; currentQIdx = 0; finalCorrect = 0; document.getElementById('student-wait-msg').style.display='none'; document.getElementById('quiz-zone').style.display='block'; nextQ(); }
-        function nextQ() {
-            if(currentQIdx < stuQs.length) {
-                document.getElementById('q-text').innerText = stuQs[currentQIdx].q;
-                const mZone = document.getElementById('mcq-zone'), tZone = document.getElementById('type-zone');
-                if(stuQs[currentQIdx].options.length > 0) {
-                    mZone.style.display = 'grid'; tZone.style.display = 'none'; mZone.innerHTML = '';
-                    stuQs[currentQIdx].options.forEach(opt => { let b = document.createElement('button'); b.className='btn-main'; b.innerText=opt; b.onclick=()=>check(opt); mZone.appendChild(b); });
-                } else { mZone.style.display = 'none'; tZone.style.display = 'block'; document.getElementById('ans-input').value = ''; }
-            } else { document.getElementById('quiz-zone').innerHTML = `<h2>DONE!</h2><h1>SCORE: ${finalCorrect}</h1>`; }
-        }
-
-        function check(val) {
-            let isCorrect = val.trim().toLowerCase() == stuQs[currentQIdx].a.trim().toLowerCase();
-            if(isCorrect) { finalCorrect++; conn.send({type:'score', name: stuName, correct: true}); } 
-            else { conn.send({type:'score', name: stuName, correct: false}); document.getElementById('main-card').classList.add('shake'); setTimeout(() => document.getElementById('main-card').classList.remove('shake'), 400); }
-            currentQIdx++; setTimeout(nextQ, 600);
-        }
-        function checkTypedAnswer() { check(document.getElementById('ans-input').value); }
-        function teacherStart() { document.getElementById('teacher-results').style.display='block'; Object.values(peer.connections).forEach(conns => { conns.forEach(c => c.send({type:'start', questions: db[currentTopic]})); }); document.getElementById('start-btn').style.display='none'; }
-        renderLib();
     </script>
 </body>
 </html>
