@@ -3,153 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiriosity Arena</title>
+    <title>Aura Arena | Research Suite</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;900&family=Bungee&display=swap');
         :root { --bg: #2d0a0a; --card: #4a0e0e; --accent: #ffcc00; --red: #ff4757; --text: #ffffff; }
         
         body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        .card { background: var(--card); border-radius: 30px; padding: 25px; width: 95%; max-width: 420px; text-align: center; border: 4px solid var(--accent); box-shadow: 0 0 30px rgba(255, 204, 0, 0.2); max-height: 90vh; overflow-y: auto; }
+        .card { background: var(--card); border-radius: 30px; padding: 20px; width: 95%; max-width: 550px; text-align: center; border: 4px solid var(--accent); box-shadow: 0 0 30px rgba(255, 204, 0, 0.2); max-height: 95vh; overflow-y: auto; position: relative; }
         
-        .view { display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-in-out; }
+        .view { display: none; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease-in-out; }
         .active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .logo { font-family: 'Bungee'; color: var(--accent); font-size: 2.2rem; margin: 0; text-shadow: 4px 4px 0px rgba(0,0,0,0.5); }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         
-        button { padding: 14px; border-radius: 16px; border: none; font-family: 'Bungee'; cursor: pointer; transition: 0.2s; font-size: 0.8rem; }
-        .btn-main { background: var(--accent); color: #2d0a0a; width: 100%; box-shadow: 0 5px 0 #b38f00; }
-        .btn-main:active { transform: translateY(3px); box-shadow: 0 2px 0 #b38f00; }
+        .shake { animation: shake 0.4s; border: 4px solid var(--red) !important; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }
+
+        .logo { font-family: 'Bungee'; color: var(--accent); font-size: 2rem; margin: 0; }
+        button { padding: 12px; border-radius: 15px; border: none; font-family: 'Bungee'; cursor: pointer; transition: 0.2s; font-size: 0.8rem; }
+        .btn-main { background: var(--accent); color: #2d0a0a; width: 100%; box-shadow: 0 4px 0 #b38f00; }
         .btn-sec { background: rgba(255, 255, 255, 0.1); color: white; width: 100%; border: 1px solid rgba(255, 255, 255, 0.2); }
-        
-        /* Multiple Choice Grid */
-        .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .btn-choice { background: rgba(255,255,255,0.1); color: white; border: 2px solid var(--accent); font-family: 'Outfit'; font-weight: 900; padding: 12px; border-radius: 12px; }
-        
-        input, select { padding: 12px; border-radius: 12px; border: 2px solid var(--accent); background: rgba(0,0,0,0.4); color: white; text-align: center; width: 100%; box-sizing: border-box; }
 
-        .item-row { background: rgba(0, 0, 0, 0.3); padding: 12px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; border-left: 4px solid var(--accent); }
-        
-        #game-canvas { display: flex; justify-content: space-around; align-items: flex-end; height: 140px; background: rgba(0,0,0,0.4); border-radius: 20px; padding: 15px; border: 2px solid var(--accent); margin-bottom: 10px; position: relative; }
-        .rocket { position: absolute; transition: 0.8s; font-size: 1.8rem; bottom: 0; }
-        .block { width: 30px; height: 12px; background: var(--accent); border-radius: 4px; margin-top: 2px; }
-        .p-name { font-size: 0.6rem; color: var(--accent); position: absolute; top: -18px; font-weight: 900; }
+        #game-canvas { 
+            display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start;
+            gap: 10px; height: 320px; background: rgba(0,0,0,0.4); border-radius: 20px; padding: 15px; 
+            border: 2px solid var(--accent); margin-bottom: 10px; overflow-y: auto;
+        }
+        .player-box { width: 65px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 85px; position: relative;}
 
-        .prog-bg { background: rgba(255, 255, 255, 0.1); height: 16px; border-radius: 20px; overflow: hidden; margin: 10px 0; border: 1px solid var(--accent); }
-        #prog-bar { background: var(--accent); width: 0%; height: 100%; transition: 0.5s; }
+        /* GAME VISUALS */
+        .sun { background: radial-gradient(circle, #fff, var(--accent), #ff8800); border-radius: 50%; transition: 0.4s; }
+        .bat-shell { width: 18px; height: 45px; border: 2px solid white; border-radius: 4px; position: relative; }
+        .bat-fill { background: var(--accent); width: 100%; position: absolute; bottom: 0; transition: 0.5s; }
+        .pizza-plate { width: 40px; height: 40px; background: #f3e5ab; border: 2px solid #d2691e; border-radius: 50%; display: flex; flex-wrap: wrap; padding: 2px; justify-content: center; align-items: center; overflow: hidden; }
+        .topping { font-size: 8px; margin: -1px; }
+
+        .p-name { font-size: 0.5rem; color: var(--accent); font-weight: 900; margin-top: 5px; text-transform: uppercase; white-space: nowrap; overflow: hidden; width: 100%; }
+        .leaderboard td { padding: 8px; background: rgba(0,0,0,0.2); font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1 class="logo">QUIRIOSITY</h1>
+    <div class="card" id="main-card">
+        <h1 class="logo">AURA ARENA</h1>
         
         <div id="view-home" class="view active">
-            <button class="btn-main" onclick="showView('view-stu-login')">STUDENT JOIN</button>
-            <button class="btn-sec" onclick="showView('view-lib')">TEACHER DASHBOARD</button>
+            <button class="btn-main" onclick="showView('view-stu-login')">JOIN RESEARCH SESSION</button>
+            <button class="btn-sec" onclick="showView('view-lib')">TEACHER CONSOLE</button>
         </div>
 
         <div id="view-lib" class="view">
-            <h3>FOLDERS</h3>
             <div id="topics"></div>
-            <button class="btn-main" onclick="addTopic()">+ NEW FOLDER</button>
+            <button class="btn-main" onclick="addTopic()">+ CREATE QUESTION SET</button>
             <button class="btn-sec" onclick="showView('view-home')">BACK</button>
         </div>
 
         <div id="view-edit" class="view">
-            <h3 id="edit-title">EDITOR</h3>
-            <div id="questions-list" style="max-height: 180px; overflow-y: auto;"></div>
-            <button class="btn-sec" onclick="addHybridQuestion()" style="color:var(--accent)">+ ADD QUESTION</button>
-            <p style="font-size:0.7rem; opacity:0.6;">Tip: Leave "Wrong Options" blank to make it a typing question!</p>
-            <hr style="opacity:0.2">
-            <select id="game-select"><option value="rocket">🚀 ROCKET RACE</option><option value="tower">🏗️ TOWER CLIMB</option></select>
-            <input type="number" id="room-code" placeholder="ROOM CODE">
-            <button class="btn-main" onclick="hostGame()">LAUNCH</button>
-            <button class="btn-sec" onclick="showView('view-lib')">BACK</button>
+            <h3 id="edit-title">MODULE EDITOR</h3>
+            <div id="questions-list" style="max-height: 120px; overflow-y: auto;"></div>
+            <button class="btn-sec" onclick="addHybridQuestion()">+ ADD QUESTION</button>
+            
+            <label style="font-size:0.7rem;">SELECT EXPERIMENT MODE:</label>
+            <select id="game-select" style="padding:10px; border-radius:10px; background:#000; color:white;">
+                <option value="forge">☀️ SOLAR FORGE (Growth)</option>
+                <option value="battery">🔋 POWER CELL (Completion)</option>
+                <option value="pizza">🍕 PIZZA PARTY (Collection)</option>
+            </select>
+            
+            <input type="number" id="room-code" placeholder="SESSION CODE">
+            <button class="btn-main" onclick="hostGame()">START EXPERIMENT</button>
         </div>
 
         <div id="view-stu-login" class="view">
-            <input type="text" id="stu-name" placeholder="NICKNAME">
-            <input type="number" id="join-code" placeholder="ROOM CODE">
-            <button class="btn-main" onclick="joinGame()">READY!</button>
+            <input type="text" id="stu-name" placeholder="YOUR NICKNAME">
+            <input type="number" id="join-code" placeholder="SESSION CODE">
+            <button class="btn-main" onclick="joinGame()">CONNECT</button>
         </div>
 
         <div id="view-arena" class="view">
-            <h4 id="arena-status" style="margin:0; color:var(--accent);">LOBBY</h4>
             <div id="game-canvas"></div>
             <div id="quiz-zone" style="display:none;">
-                <div class="prog-bg"><div id="prog-bar"></div></div>
-                <p id="q-text" style="font-weight: 900; margin: 10px 0;"></p>
-                <div id="mcq-zone" class="choice-grid"></div>
+                <p id="q-text" style="font-weight: 900; font-size: 1.1rem;"></p>
+                <div id="mcq-zone" style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
                 <div id="type-zone" style="display:none;">
                     <input type="text" id="ans-input" placeholder="Type answer...">
                     <button class="btn-main" onclick="checkTypedAnswer()" style="margin-top:10px">SUBMIT</button>
                 </div>
             </div>
-            <button id="start-btn" class="btn-main" style="display:none;" onclick="teacherStart()">START</button>
-            <p id="student-wait-msg" style="display:none;">Waiting for teacher...</p>
+            
+            <div id="teacher-results" style="display:none;">
+                <table style="width:100%;" class="leaderboard"><tbody id="leaderboard-body"></tbody></table>
+            </div>
+
+            <button id="start-btn" class="btn-main" style="display:none;" onclick="teacherStart()">LAUNCH QUIZ</button>
+            <p id="student-wait-msg" style="display:none;">Connected. Waiting for host...</p>
         </div>
     </div>
 
     <script>
-        let peer, conn, myRole, currentTopic, selectedMode;
-        let db = JSON.parse(localStorage.getItem('q_hybrid_data')) || {}; 
-        let players = {};
-        let score = 0;
+        let peer, conn, myRole, currentTopic, roomCode, selectedMode;
+        let db = JSON.parse(localStorage.getItem('aura_research_v1')) || {}; 
+        let players = {}; 
+        let playerCorrectCount = {}; 
+        const toppings = ['🍕','🍄','🫑','🧅','🥓','🍍'];
 
-        function showView(id) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
+        function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function renderLib() {
             const div = document.getElementById('topics'); div.innerHTML = '';
             Object.keys(db).forEach(t => {
-                div.innerHTML += `<div class="item-row"><span onclick="openTopic('${t}')" style="flex-grow:1; cursor:pointer;">📂 ${t}</span><button style="background:var(--red); padding:5px;" onclick="deleteTopic('${t}')">🗑️</button></div>`;
+                div.innerHTML += `<div style="display:flex; gap:5px; margin-bottom:5px;"><button class="btn-sec" onclick="openTopic('${t}')" style="flex:1; text-align:left;">📂 ${t}</button></div>`;
             });
         }
-
         function openTopic(t) { currentTopic = t; document.getElementById('edit-title').innerText = t; renderQuestions(); showView('view-edit'); }
-
         function renderQuestions() {
             const div = document.getElementById('questions-list'); div.innerHTML = '';
-            db[currentTopic].forEach((q, i) => {
-                let type = q.options.length > 0 ? "MCQ" : "TYPE";
-                div.innerHTML += `<div class="item-row"><span style="font-size:0.8rem;">[${type}] ${q.q}</span><button style="background:var(--red); padding:5px;" onclick="deleteQuestion(${i})">✕</button></div>`;
-            });
+            db[currentTopic].forEach((q, i) => { div.innerHTML += `<div style="font-size:0.7rem; padding:8px; background:rgba(0,0,0,0.2); margin-bottom:4px; border-radius:8px;">${q.q}</div>`; });
         }
-
-        function addTopic() { let n = prompt("Folder Name?"); if(n){ db[n]=[]; save(); renderLib(); }}
-        function deleteTopic(t) { if(confirm("Delete?")){ delete db[t]; save(); renderLib(); }}
-        
+        function addTopic() { let n = prompt("Module Name?"); if(n){ db[n]=[]; save(); renderLib(); }}
         function addHybridQuestion() {
-            let q = prompt("Question:");
-            let a = prompt("Correct Answer:");
-            let w = prompt("Optional: Enter wrong answers separated by commas (or leave blank to make it a typing question):");
+            let q = prompt("Question:"), a = prompt("Answer:"), w = prompt("Wrong options (comma separated):");
             let opts = w ? w.split(',').concat(a).sort(() => Math.random() - 0.5) : [];
             if(q && a){ db[currentTopic].push({q, a, options: opts}); save(); renderQuestions(); }
         }
-
-        function deleteQuestion(i) { db[currentTopic].splice(i, 1); save(); renderQuestions(); }
-        function save() { localStorage.setItem('q_hybrid_data', JSON.stringify(db)); }
+        function save() { localStorage.setItem('aura_research_v1', JSON.stringify(db)); }
 
         function hostGame() {
-            let code = document.getElementById('room-code').value;
+            roomCode = document.getElementById('room-code').value;
             selectedMode = document.getElementById('game-select').value;
-            peer = new Peer('q-' + code);
+            peer = new Peer('aura-' + roomCode);
             peer.on('open', () => { myRole = 'host'; showView('view-arena'); document.getElementById('start-btn').style.display='block'; });
-            peer.on('connection', c => { c.on('data', d => { if(d.type==='join'){ players[d.name]=0; updateArena(); } if(d.type==='score'){ players[d.name]++; updateArena(); } }); });
+            peer.on('connection', c => { c.on('data', d => { 
+                if(d.type==='join'){ players[d.name]=0; playerCorrectCount[d.name]=0; broadcastArena(); } 
+                if(d.type==='score'){ 
+                    if(d.correct) { players[d.name] += 1; playerCorrectCount[d.name] += 1; } 
+                    else { players[d.name] -= 1; if(players[d.name] < 0) players[d.name] = 0; }
+                    broadcastArena(); updateLeaderboard();
+                } 
+            }); });
         }
 
-        function updateArena() {
+        function updateLeaderboard() {
+            let body = document.getElementById('leaderboard-body'); body.innerHTML = '';
+            let sorted = Object.keys(playerCorrectCount).sort((a,b) => playerCorrectCount[b] - playerCorrectCount[a]);
+            sorted.forEach((name, i) => { body.innerHTML += `<tr><td>#${i+1}</td><td>${name}</td><td>${playerCorrectCount[name]} pts</td></tr>`; });
+        }
+
+        function updateArenaUI() {
             const canvas = document.getElementById('game-canvas'); canvas.innerHTML = '';
             for(let p in players) {
-                let track = document.createElement('div'); track.className = 'player-track';
-                track.innerHTML = `<span class="p-name">${p}</span>`;
-                if(selectedMode === 'rocket') track.innerHTML += `<span class="rocket" style="bottom:${players[p] * 20}px">🚀</span>`;
-                else for(let i=0; i<players[p]; i++) track.innerHTML += `<div class="block" style="position:absolute; bottom:${i*14}px"></div>`;
-                canvas.appendChild(track);
+                let box = document.createElement('div'); box.className = 'player-box';
+                let score = players[p];
+                if(selectedMode === 'forge') {
+                    let s = 15 + (score * 5); box.innerHTML = `<div class="sun" style="width:${s}px; height:${s}px; box-shadow: 0 0 ${score*4}px var(--accent)"></div>`;
+                } else if(selectedMode === 'battery') {
+                    box.innerHTML = `<div class="bat-shell"><div class="bat-fill" style="height:${Math.min(score*10, 100)}%"></div></div>`;
+                } else {
+                    let tStr = ''; for(let i=0; i<score; i++) { tStr += `<span class="topping">${toppings[i%toppings.length]}</span>`; }
+                    box.innerHTML = `<div class="pizza-plate">${tStr}</div>`;
+                }
+                box.innerHTML += `<span class="p-name">${p}</span>`;
+                canvas.appendChild(box);
+            }
+        }
+
+        function broadcastArena() {
+            updateArenaUI();
+            if(myRole === 'host') {
+                Object.values(peer.connections).forEach(conns => { conns.forEach(c => c.send({type: 'sync', players: players, mode: selectedMode})); });
             }
         }
 
@@ -157,47 +177,35 @@
             let n = document.getElementById('stu-name').value, c = document.getElementById('join-code').value;
             peer = new Peer();
             peer.on('open', () => {
-                conn = peer.connect('q-' + c);
-                conn.on('open', () => { myRole='student'; showView('view-arena'); document.getElementById('game-canvas').style.display='none'; document.getElementById('student-wait-msg').style.display='block'; conn.send({type:'join', name: n}); });
-                conn.on('data', d => { if(d.type==='start') startQuiz(d.questions, n); });
+                conn = peer.connect('aura-' + c);
+                conn.on('open', () => { myRole='student'; showView('view-arena'); document.getElementById('student-wait-msg').style.display='block'; conn.send({type:'join', name: n}); });
+                conn.on('data', d => { if(d.type==='start') startQuiz(d.questions, n); if(d.type==='sync') { players = d.players; selectedMode = d.mode; updateArenaUI(); } });
             });
         }
 
-        let currentQIdx = 0, stuQs = [], stuName = "";
-        function startQuiz(qs, name) { stuQs = qs; stuName = name; currentQIdx = 0; score = 0; document.getElementById('student-wait-msg').style.display='none'; document.getElementById('quiz-zone').style.display='block'; nextQ(); }
-
+        let currentQIdx = 0, stuQs = [], stuName = "", finalCorrect = 0;
+        function startQuiz(qs, name) { stuQs = qs; stuName = name; currentQIdx = 0; finalCorrect = 0; document.getElementById('student-wait-msg').style.display='none'; document.getElementById('quiz-zone').style.display='block'; nextQ(); }
         function nextQ() {
             if(currentQIdx < stuQs.length) {
-                let q = stuQs[currentQIdx];
-                document.getElementById('q-text').innerText = q.q;
-                document.getElementById('prog-bar').style.width = ((currentQIdx / stuQs.length) * 100) + "%";
-                if(q.options.length > 0) {
-                    document.getElementById('mcq-zone').style.display = 'grid';
-                    document.getElementById('type-zone').style.display = 'none';
-                    document.getElementById('mcq-zone').innerHTML = '';
-                    q.options.forEach(opt => {
-                        let b = document.createElement('button'); b.className='btn-choice'; b.innerText=opt; b.onclick=()=>check(opt);
-                        document.getElementById('mcq-zone').appendChild(b);
-                    });
-                } else {
-                    document.getElementById('mcq-zone').style.display = 'none';
-                    document.getElementById('type-zone').style.display = 'block';
-                    document.getElementById('ans-input').value = '';
-                }
-            } else {
-                document.getElementById('quiz-zone').innerHTML = `<h2 style="color:var(--accent)">FINISHED!</h2><h1>Score: ${score}</h1><button class="btn-main" onclick="location.reload()">DONE</button>`;
-            }
+                document.getElementById('q-text').innerText = stuQs[currentQIdx].q;
+                const mZone = document.getElementById('mcq-zone'), tZone = document.getElementById('type-zone');
+                if(stuQs[currentQIdx].options.length > 0) {
+                    mZone.style.display = 'grid'; tZone.style.display = 'none'; mZone.innerHTML = '';
+                    stuQs[currentQIdx].options.forEach(opt => { let b = document.createElement('button'); b.className='btn-choice'; b.innerText=opt; b.onclick=()=>check(opt); mZone.appendChild(b); });
+                } else { mZone.style.display = 'none'; tZone.style.display = 'block'; document.getElementById('ans-input').value = ''; }
+            } else { document.getElementById('quiz-zone').innerHTML = `<h2>COMPLETE</h2><h1>${finalCorrect} CORRECT</h1>`; }
         }
 
         function check(val) {
-            if(val.trim().toLowerCase() == stuQs[currentQIdx].a.trim().toLowerCase()) {
-                score++; conn.send({type:'score', name: stuName}); currentQIdx++; nextQ();
-            } else { alert("Try again!"); }
+            let isCorrect = val.trim().toLowerCase() == stuQs[currentQIdx].a.trim().toLowerCase();
+            if(isCorrect) { finalCorrect++; conn.send({type:'score', name: stuName, correct: true}); } 
+            else { conn.send({type:'score', name: stuName, correct: false}); document.getElementById('main-card').classList.add('shake'); setTimeout(() => document.getElementById('main-card').classList.remove('shake'), 400); }
+            currentQIdx++; setTimeout(nextQ, 600);
         }
-
         function checkTypedAnswer() { check(document.getElementById('ans-input').value); }
-        function teacherStart() { peer.connections[Object.keys(peer.connections)[0]].forEach(c => { c.send({type:'start', questions: db[currentTopic]}); }); document.getElementById('start-btn').style.display='none'; }
+        function teacherStart() { document.getElementById('teacher-results').style.display='block'; Object.values(peer.connections).forEach(conns => { conns.forEach(c => c.send({type:'start', questions: db[currentTopic]})); }); document.getElementById('start-btn').style.display='none'; }
         renderLib();
     </script>
 </body>
 </html>
+ 
