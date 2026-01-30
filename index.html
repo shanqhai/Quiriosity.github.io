@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiriosity | Research Arena</title>
+    <title>Quiriosity</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;900&family=Bungee&display=swap');
@@ -24,7 +24,6 @@
         .btn-main { background: var(--accent); color: #2d0a0a; width: 100%; box-shadow: 0 4px 0 #b38f00; }
         .btn-sec { background: rgba(255, 255, 255, 0.1); color: white; width: 100%; border: 1px solid rgba(255, 255, 255, 0.2); }
 
-        /* 50+ STUDENT GRID */
         #game-canvas { 
             display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start;
             gap: 12px; height: 300px; background: rgba(0,0,0,0.4); border-radius: 20px; padding: 15px; 
@@ -32,7 +31,6 @@
         }
         .player-box { width: 65px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 85px; }
 
-        /* GAME ELEMENTS */
         .sun { background: radial-gradient(circle, #fff, var(--accent), #ff8800); border-radius: 50%; transition: 0.4s; }
         .bat-shell { width: 18px; height: 45px; border: 2px solid white; border-radius: 4px; position: relative; }
         .bat-fill { background: var(--accent); width: 100%; position: absolute; bottom: 0; transition: 0.5s; }
@@ -42,6 +40,7 @@
         .p-name { font-size: 0.55rem; color: var(--accent); font-weight: 900; margin-top: 5px; text-transform: uppercase; white-space: nowrap; overflow: hidden; width: 100%; }
         .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .leaderboard { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; }
+        .leaderboard td { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 5px; }
     </style>
 </head>
 <body>
@@ -69,7 +68,7 @@
                 <option value="battery">🔋 POWER CELL</option>
                 <option value="pizza">🍕 PIZZA PARTY</option>
             </select>
-            <input type="number" id="room-code" placeholder="ROOM CODE (e.g. 1234)">
+            <input type="number" id="room-code" placeholder="ROOM CODE">
             <button class="btn-main" onclick="hostGame()">LAUNCH ARENA</button>
         </div>
 
@@ -82,7 +81,7 @@
         <div id="view-arena" class="view">
             <div id="game-canvas"></div>
             <div id="quiz-zone" style="display:none;">
-                <p id="q-text" style="font-weight: 900; font-size: 1.2rem;"></p>
+                <p id="q-text" style="font-weight: 900; font-size: 1.2rem; margin: 10px 0;"></p>
                 <div id="mcq-zone" class="choice-grid"></div>
                 <div id="type-zone" style="display:none;">
                     <input type="text" id="ans-input" placeholder="Your answer...">
@@ -93,13 +92,13 @@
                 <table class="leaderboard"><tbody id="leaderboard-body"></tbody></table>
             </div>
             <button id="start-btn" class="btn-main" style="display:none;" onclick="teacherStart()">START ALL</button>
-            <p id="student-wait-msg" style="display:none;">Waiting for host to start...</p>
+            <p id="student-wait-msg" style="display:none;">Connected. Waiting for host...</p>
         </div>
     </div>
 
     <script>
         let peer, conn, myRole, currentTopic, roomCode, selectedMode;
-        let db = JSON.parse(localStorage.getItem('quiriosity_data')) || {}; 
+        let db = JSON.parse(localStorage.getItem('quiriosity_research_v1')) || {}; 
         let players = {}; 
         let playerCorrectCount = {}; 
         const toppings = ['🍕','🍄','🫑','🧅','🥓','🍍'];
@@ -116,13 +115,13 @@
             const div = document.getElementById('questions-list'); div.innerHTML = '';
             db[currentTopic].forEach((q, i) => { div.innerHTML += `<div style="font-size:0.75rem; padding:8px; background:rgba(0,0,0,0.2); margin-bottom:4px; border-radius:8px;">${q.q}</div>`; });
         }
-        function addTopic() { let n = prompt("Title?"); if(n){ db[n]=[]; save(); renderLib(); }}
+        function addTopic() { let n = prompt("Set Title?"); if(n){ db[n]=[]; save(); renderLib(); }}
         function addHybridQuestion() {
             let q = prompt("Question:"), a = prompt("Answer:"), w = prompt("Wrong options (comma separated):");
             let opts = w ? w.split(',').concat(a).sort(() => Math.random() - 0.5) : [];
             if(q && a){ db[currentTopic].push({q, a, options: opts}); save(); renderQuestions(); }
         }
-        function save() { localStorage.setItem('quiriosity_data', JSON.stringify(db)); }
+        function save() { localStorage.setItem('quiriosity_research_v1', JSON.stringify(db)); }
 
         function hostGame() {
             roomCode = document.getElementById('room-code').value;
@@ -190,7 +189,7 @@
                     mZone.style.display = 'grid'; tZone.style.display = 'none'; mZone.innerHTML = '';
                     stuQs[currentQIdx].options.forEach(opt => { let b = document.createElement('button'); b.className='btn-main'; b.innerText=opt; b.onclick=()=>check(opt); mZone.appendChild(b); });
                 } else { mZone.style.display = 'none'; tZone.style.display = 'block'; document.getElementById('ans-input').value = ''; }
-            } else { document.getElementById('quiz-zone').innerHTML = `<h2>FINISHED!</h2><h1>SCORE: ${finalCorrect}</h1><button class="btn-main" onclick="location.reload()">RESTART</button>`; }
+            } else { document.getElementById('quiz-zone').innerHTML = `<h2>DONE!</h2><h1>SCORE: ${finalCorrect}</h1>`; }
         }
 
         function check(val) {
