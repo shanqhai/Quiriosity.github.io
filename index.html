@@ -7,33 +7,37 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;900&family=Bungee&display=swap');
-        :root { --bg: #0f0f1a; --neon: #00ffcc; --accent: #ffa502; --red: #ff4757; }
-        body { background: var(--bg); color: white; font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        .card { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 30px; padding: 30px; width: 90%; max-width: 450px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .view { display: none; flex-direction: column; gap: 15px; }
+        :root { --bg: #2d0a0a; --card: #4a0e0e; --accent: #ffcc00; --red: #ff4757; --text: #ffffff; }
+        
+        body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        .card { background: var(--card); border-radius: 30px; padding: 25px; width: 95%; max-width: 420px; text-align: center; border: 4px solid var(--accent); box-shadow: 0 0 30px rgba(255, 204, 0, 0.2); max-height: 90vh; overflow-y: auto; }
+        
+        .view { display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease-in-out; }
         .active { display: flex; }
-        .logo { font-family: 'Bungee'; color: var(--accent); font-size: 2.5rem; margin: 0; letter-spacing: 2px; }
-        button { padding: 15px; border-radius: 15px; border: none; font-family: 'Bungee'; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
-        .btn-main { background: var(--accent); color: #0f0f1a; width: 100%; box-shadow: 0 4px 0 #c47b00; }
-        .btn-main:active { transform: translateY(2px); box-shadow: 0 2px 0 #c47b00; }
-        .btn-sec { background: rgba(255,255,255,0.1); color: white; width: 100%; }
-        .topic-row { display: flex; gap: 10px; margin-bottom: 8px; }
-        .btn-del { background: var(--red); color: white; width: 50px; padding: 10px; border-radius: 12px; }
-        input, select { padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; text-align: center; width: 100%; box-sizing: border-box; font-family: 'Outfit'; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .logo { font-family: 'Bungee'; color: var(--accent); font-size: 2.2rem; margin: 0; text-shadow: 4px 4px 0px rgba(0,0,0,0.5); }
         
-        /* Teacher Game Visuals */
-        #game-canvas { display: flex; justify-content: space-around; align-items: flex-end; height: 220px; background: rgba(0,0,0,0.4); border-radius: 20px; padding: 15px; margin: 15px 0; border: 1px solid var(--neon); }
-        .player-track { display: flex; flex-direction: column-reverse; align-items: center; width: 60px; height: 100%; position: relative; }
-        .rocket { position: absolute; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 1.8rem; bottom: 0; }
-        .block { width: 35px; height: 15px; background: var(--neon); border-radius: 3px; margin-top: 2px; box-shadow: 0 0 10px var(--neon); }
-        .p-name { font-size: 0.65rem; color: var(--accent); position: absolute; top: -15px; font-weight: 900; white-space: nowrap; }
+        button { padding: 14px; border-radius: 16px; border: none; font-family: 'Bungee'; cursor: pointer; transition: 0.2s; font-size: 0.8rem; }
+        .btn-main { background: var(--accent); color: #2d0a0a; width: 100%; box-shadow: 0 5px 0 #b38f00; }
+        .btn-main:active { transform: translateY(3px); box-shadow: 0 2px 0 #b38f00; }
+        .btn-sec { background: rgba(255, 255, 255, 0.1); color: white; width: 100%; border: 1px solid rgba(255, 255, 255, 0.2); }
         
-        /* Student Game Visuals */
-        #stu-score-box { background: var(--neon); color: #0f0f1a; padding: 12px; border-radius: 15px; font-weight: 900; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; }
-        .progress-container { background: rgba(255,255,255,0.1); height: 12px; border-radius: 6px; margin: 15px 0; overflow: hidden; }
-        #progress-bar { background: var(--neon); width: 0%; height: 100%; transition: 0.5s; }
-        .finish-card { animation: pop 0.5s ease-out; }
-        @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        /* Multiple Choice Grid */
+        .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn-choice { background: rgba(255,255,255,0.1); color: white; border: 2px solid var(--accent); font-family: 'Outfit'; font-weight: 900; padding: 12px; border-radius: 12px; }
+        
+        input, select { padding: 12px; border-radius: 12px; border: 2px solid var(--accent); background: rgba(0,0,0,0.4); color: white; text-align: center; width: 100%; box-sizing: border-box; }
+
+        .item-row { background: rgba(0, 0, 0, 0.3); padding: 12px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; border-left: 4px solid var(--accent); }
+        
+        #game-canvas { display: flex; justify-content: space-around; align-items: flex-end; height: 140px; background: rgba(0,0,0,0.4); border-radius: 20px; padding: 15px; border: 2px solid var(--accent); margin-bottom: 10px; position: relative; }
+        .rocket { position: absolute; transition: 0.8s; font-size: 1.8rem; bottom: 0; }
+        .block { width: 30px; height: 12px; background: var(--accent); border-radius: 4px; margin-top: 2px; }
+        .p-name { font-size: 0.6rem; color: var(--accent); position: absolute; top: -18px; font-weight: 900; }
+
+        .prog-bg { background: rgba(255, 255, 255, 0.1); height: 16px; border-radius: 20px; overflow: hidden; margin: 10px 0; border: 1px solid var(--accent); }
+        #prog-bar { background: var(--accent); width: 0%; height: 100%; transition: 0.5s; }
     </style>
 </head>
 <body>
@@ -42,60 +46,55 @@
         <h1 class="logo">QUIRIOSITY</h1>
         
         <div id="view-home" class="view active">
-            <p style="opacity: 0.7; font-size: 0.9rem; margin-top: -10px;">The Live Classroom Arena</p>
-            <button class="btn-main" onclick="showView('view-stu-login')">JOIN AS STUDENT</button>
+            <button class="btn-main" onclick="showView('view-stu-login')">STUDENT JOIN</button>
             <button class="btn-sec" onclick="showView('view-lib')">TEACHER DASHBOARD</button>
         </div>
 
         <div id="view-lib" class="view">
-            <h3>MY FOLDERS</h3>
-            <div id="topics" style="max-height: 250px; overflow-y: auto;"></div>
-            <button class="btn-main" onclick="addTopic()">+ CREATE NEW FOLDER</button>
-            <button class="btn-sec" onclick="showView('view-home')">BACK TO HOME</button>
-        </div>
-
-        <div id="view-edit" class="view">
-            <h3 id="edit-title">FOLDER</h3>
-            <div id="questions" style="max-height: 150px; overflow-y: auto; text-align: left; font-size: 0.8rem; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px;"></div>
-            <button class="btn-sec" onclick="addQuestion()">+ ADD NEW QUESTION</button>
-            <hr style="opacity: 0.1; width: 100%;">
-            <select id="game-select">
-                <option value="rocket">🚀 ROCKET RACE</option>
-                <option value="tower">🏗️ TOWER CLIMB</option>
-            </select>
-            <input type="number" id="room-code" placeholder="ENTER ROOM CODE">
-            <button class="btn-main" style="background:var(--red); color:white;" onclick="hostGame()">ACTIVATE ARENA</button>
-            <button class="btn-sec" onclick="showView('view-lib')">BACK TO LIBRARY</button>
-        </div>
-
-        <div id="view-stu-login" class="view">
-            <input type="text" id="stu-name" placeholder="YOUR NICKNAME">
-            <input type="number" id="join-code" placeholder="ROOM CODE">
-            <button class="btn-main" onclick="joinGame()">READY TO PLAY</button>
+            <h3>FOLDERS</h3>
+            <div id="topics"></div>
+            <button class="btn-main" onclick="addTopic()">+ NEW FOLDER</button>
             <button class="btn-sec" onclick="showView('view-home')">BACK</button>
         </div>
 
+        <div id="view-edit" class="view">
+            <h3 id="edit-title">EDITOR</h3>
+            <div id="questions-list" style="max-height: 180px; overflow-y: auto;"></div>
+            <button class="btn-sec" onclick="addHybridQuestion()" style="color:var(--accent)">+ ADD QUESTION</button>
+            <p style="font-size:0.7rem; opacity:0.6;">Tip: Leave "Wrong Options" blank to make it a typing question!</p>
+            <hr style="opacity:0.2">
+            <select id="game-select"><option value="rocket">🚀 ROCKET RACE</option><option value="tower">🏗️ TOWER CLIMB</option></select>
+            <input type="number" id="room-code" placeholder="ROOM CODE">
+            <button class="btn-main" onclick="hostGame()">LAUNCH</button>
+            <button class="btn-sec" onclick="showView('view-lib')">BACK</button>
+        </div>
+
+        <div id="view-stu-login" class="view">
+            <input type="text" id="stu-name" placeholder="NICKNAME">
+            <input type="number" id="join-code" placeholder="ROOM CODE">
+            <button class="btn-main" onclick="joinGame()">READY!</button>
+        </div>
+
         <div id="view-arena" class="view">
-            <h3 id="arena-status" style="margin:0;">LOBBY</h3>
+            <h4 id="arena-status" style="margin:0; color:var(--accent);">LOBBY</h4>
             <div id="game-canvas"></div>
-            
             <div id="quiz-zone" style="display:none;">
-                <div id="stu-score-box"><span>SCORE</span> <span id="my-score-val">0</span></div>
-                <div class="progress-container"><div id="progress-bar"></div></div>
-                <p id="q-text" style="font-size: 1.2rem; font-weight: 700; min-height: 60px;"></p>
-                <input type="text" id="ans-input" placeholder="Type Answer Here...">
-                <button class="btn-main" onclick="checkAnswer()" style="margin-top: 15px;">SUBMIT ANSWER</button>
+                <div class="prog-bg"><div id="prog-bar"></div></div>
+                <p id="q-text" style="font-weight: 900; margin: 10px 0;"></p>
+                <div id="mcq-zone" class="choice-grid"></div>
+                <div id="type-zone" style="display:none;">
+                    <input type="text" id="ans-input" placeholder="Type answer...">
+                    <button class="btn-main" onclick="checkTypedAnswer()" style="margin-top:10px">SUBMIT</button>
+                </div>
             </div>
-            
-            <button id="start-btn" class="btn-main" style="display:none;" onclick="teacherStart()">START SESSION</button>
-            <p id="student-wait-msg" style="display:none; font-size: 0.9rem; font-style: italic; opacity: 0.6;">Waiting for teacher to start...</p>
+            <button id="start-btn" class="btn-main" style="display:none;" onclick="teacherStart()">START</button>
+            <p id="student-wait-msg" style="display:none;">Waiting for teacher...</p>
         </div>
     </div>
 
     <script>
         let peer, conn, myRole, currentTopic, selectedMode;
-        // Starts empty. Teacher creates folders manually.
-        let db = JSON.parse(localStorage.getItem('q_data')) || {}; 
+        let db = JSON.parse(localStorage.getItem('q_hybrid_data')) || {}; 
         let players = {};
         let score = 0;
 
@@ -104,38 +103,43 @@
             document.getElementById(id).classList.add('active');
         }
 
-        /* --- TEACHER FUNCTIONS --- */
         function renderLib() {
             const div = document.getElementById('topics'); div.innerHTML = '';
-            const keys = Object.keys(db);
-            if(keys.length === 0) div.innerHTML = '<p style="font-size:0.8rem; opacity:0.5;">No folders. Create one to begin!</p>';
-            keys.forEach(t => {
-                div.innerHTML += `<div class="topic-row"><button class="btn-sec" style="text-align:left;" onclick="openTopic('${t}')">📂 ${t}</button><button class="btn-del" onclick="deleteTopic('${t}')">🗑️</button></div>`;
+            Object.keys(db).forEach(t => {
+                div.innerHTML += `<div class="item-row"><span onclick="openTopic('${t}')" style="flex-grow:1; cursor:pointer;">📂 ${t}</span><button style="background:var(--red); padding:5px;" onclick="deleteTopic('${t}')">🗑️</button></div>`;
             });
         }
+
         function openTopic(t) { currentTopic = t; document.getElementById('edit-title').innerText = t; renderQuestions(); showView('view-edit'); }
-        function renderQuestions() { const div = document.getElementById('questions'); div.innerHTML = ''; db[currentTopic].forEach(q => div.innerHTML += `<div style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.05)">Q: ${q.q}</div>`); }
+
+        function renderQuestions() {
+            const div = document.getElementById('questions-list'); div.innerHTML = '';
+            db[currentTopic].forEach((q, i) => {
+                let type = q.options.length > 0 ? "MCQ" : "TYPE";
+                div.innerHTML += `<div class="item-row"><span style="font-size:0.8rem;">[${type}] ${q.q}</span><button style="background:var(--red); padding:5px;" onclick="deleteQuestion(${i})">✕</button></div>`;
+            });
+        }
+
         function addTopic() { let n = prompt("Folder Name?"); if(n){ db[n]=[]; save(); renderLib(); }}
-        function deleteTopic(t) { if(confirm(`Delete "${t}"?`)){ delete db[t]; save(); renderLib(); }}
-        function addQuestion() { let q=prompt("Question?"), a=prompt("Answer?"); if(q&&a){ db[currentTopic].push({q,a}); save(); renderQuestions(); }}
-        function save() { localStorage.setItem('q_data', JSON.stringify(db)); }
+        function deleteTopic(t) { if(confirm("Delete?")){ delete db[t]; save(); renderLib(); }}
+        
+        function addHybridQuestion() {
+            let q = prompt("Question:");
+            let a = prompt("Correct Answer:");
+            let w = prompt("Optional: Enter wrong answers separated by commas (or leave blank to make it a typing question):");
+            let opts = w ? w.split(',').concat(a).sort(() => Math.random() - 0.5) : [];
+            if(q && a){ db[currentTopic].push({q, a, options: opts}); save(); renderQuestions(); }
+        }
+
+        function deleteQuestion(i) { db[currentTopic].splice(i, 1); save(); renderQuestions(); }
+        function save() { localStorage.setItem('q_hybrid_data', JSON.stringify(db)); }
 
         function hostGame() {
             let code = document.getElementById('room-code').value;
             selectedMode = document.getElementById('game-select').value;
-            if(!code) return alert("Enter a Room Code!");
             peer = new Peer('q-' + code);
-            peer.on('open', () => {
-                myRole = 'host'; showView('view-arena');
-                document.getElementById('arena-status').innerText = "ROOM: " + code;
-                document.getElementById('start-btn').style.display = 'block';
-            });
-            peer.on('connection', c => {
-                c.on('data', data => {
-                    if(data.type === 'join') { players[data.name] = 0; updateArena(); }
-                    if(data.type === 'score') { players[data.name]++; updateArena(); }
-                });
-            });
+            peer.on('open', () => { myRole = 'host'; showView('view-arena'); document.getElementById('start-btn').style.display='block'; });
+            peer.on('connection', c => { c.on('data', d => { if(d.type==='join'){ players[d.name]=0; updateArena(); } if(d.type==='score'){ players[d.name]++; updateArena(); } }); });
         }
 
         function updateArena() {
@@ -143,72 +147,56 @@
             for(let p in players) {
                 let track = document.createElement('div'); track.className = 'player-track';
                 track.innerHTML = `<span class="p-name">${p}</span>`;
-                if(selectedMode === 'rocket') { track.innerHTML += `<span class="rocket" style="bottom:${players[p] * 25}px">🚀</span>`; }
-                else { for(let i=0; i<players[p]; i++) track.innerHTML += `<div class="block"></div>`; }
+                if(selectedMode === 'rocket') track.innerHTML += `<span class="rocket" style="bottom:${players[p] * 20}px">🚀</span>`;
+                else for(let i=0; i<players[p]; i++) track.innerHTML += `<div class="block" style="position:absolute; bottom:${i*14}px"></div>`;
                 canvas.appendChild(track);
             }
         }
 
-        /* --- STUDENT FUNCTIONS --- */
         function joinGame() {
-            let name = document.getElementById('stu-name').value;
-            let code = document.getElementById('join-code').value;
-            if(!name || !code) return alert("Enter name and code!");
+            let n = document.getElementById('stu-name').value, c = document.getElementById('join-code').value;
             peer = new Peer();
             peer.on('open', () => {
-                conn = peer.connect('q-' + code);
-                conn.on('open', () => {
-                    myRole = 'student'; showView('view-arena');
-                    document.getElementById('game-canvas').style.display = 'none';
-                    document.getElementById('student-wait-msg').style.display = 'block';
-                    conn.send({type:'join', name: name});
-                });
-                conn.on('data', data => { if(data.type === 'start') { selectedMode = data.mode; startQuiz(data.questions, name); } });
+                conn = peer.connect('q-' + c);
+                conn.on('open', () => { myRole='student'; showView('view-arena'); document.getElementById('game-canvas').style.display='none'; document.getElementById('student-wait-msg').style.display='block'; conn.send({type:'join', name: n}); });
+                conn.on('data', d => { if(d.type==='start') startQuiz(d.questions, n); });
             });
         }
 
         let currentQIdx = 0, stuQs = [], stuName = "";
-        function startQuiz(qs, name) {
-            stuQs = qs; stuName = name; currentQIdx = 0; score = 0;
-            document.getElementById('student-wait-msg').style.display = 'none';
-            document.getElementById('quiz-zone').style.display = 'block';
-            nextQ();
-        }
+        function startQuiz(qs, name) { stuQs = qs; stuName = name; currentQIdx = 0; score = 0; document.getElementById('student-wait-msg').style.display='none'; document.getElementById('quiz-zone').style.display='block'; nextQ(); }
 
         function nextQ() {
             if(currentQIdx < stuQs.length) {
-                document.getElementById('q-text').innerText = stuQs[currentQIdx].q;
-                document.getElementById('progress-bar').style.width = ((currentQIdx / stuQs.length) * 100) + "%";
+                let q = stuQs[currentQIdx];
+                document.getElementById('q-text').innerText = q.q;
+                document.getElementById('prog-bar').style.width = ((currentQIdx / stuQs.length) * 100) + "%";
+                if(q.options.length > 0) {
+                    document.getElementById('mcq-zone').style.display = 'grid';
+                    document.getElementById('type-zone').style.display = 'none';
+                    document.getElementById('mcq-zone').innerHTML = '';
+                    q.options.forEach(opt => {
+                        let b = document.createElement('button'); b.className='btn-choice'; b.innerText=opt; b.onclick=()=>check(opt);
+                        document.getElementById('mcq-zone').appendChild(b);
+                    });
+                } else {
+                    document.getElementById('mcq-zone').style.display = 'none';
+                    document.getElementById('type-zone').style.display = 'block';
+                    document.getElementById('ans-input').value = '';
+                }
             } else {
-                document.getElementById('progress-bar').style.width = "100%";
-                document.getElementById('quiz-zone').innerHTML = `
-                    <div class="finish-card">
-                        <h2 style="color:var(--neon);">🌟 MISSION COMPLETE!</h2>
-                        <p style="font-size:1.1rem; opacity:0.8;">Final Personal Score:</p>
-                        <h1 style="font-size:4rem; color:var(--accent); margin:10px 0;">${score}</h1>
-                        <button class="btn-main" onclick="location.reload()">FINISH SESSION</button>
-                    </div>
-                `;
+                document.getElementById('quiz-zone').innerHTML = `<h2 style="color:var(--accent)">FINISHED!</h2><h1>Score: ${score}</h1><button class="btn-main" onclick="location.reload()">DONE</button>`;
             }
         }
 
-        function checkAnswer() {
-            let ans = document.getElementById('ans-input').value.trim().toLowerCase();
-            let realAns = stuQs[currentQIdx].a.trim().toLowerCase();
-            if(ans == realAns) {
-                score++; document.getElementById('my-score-val').innerText = score;
-                conn.send({type:'score', name: stuName});
-                currentQIdx++; document.getElementById('ans-input').value = ""; nextQ();
+        function check(val) {
+            if(val.trim().toLowerCase() == stuQs[currentQIdx].a.trim().toLowerCase()) {
+                score++; conn.send({type:'score', name: stuName}); currentQIdx++; nextQ();
             } else { alert("Try again!"); }
         }
 
-        function teacherStart() {
-            peer.connections[Object.keys(peer.connections)[0]].forEach(c => {
-                c.send({type:'start', questions: db[currentTopic], mode: selectedMode});
-            });
-            document.getElementById('start-btn').style.display = 'none';
-            document.getElementById('arena-status').innerText = "SESSION LIVE";
-        }
+        function checkTypedAnswer() { check(document.getElementById('ans-input').value); }
+        function teacherStart() { peer.connections[Object.keys(peer.connections)[0]].forEach(c => { c.send({type:'start', questions: db[currentTopic]}); }); document.getElementById('start-btn').style.display='none'; }
         renderLib();
     </script>
 </body>
