@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiriosity | Arena Home</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;900&family=Bungee&display=swap');
+        
+        :root {
+            --bg: #0f0f1a;
+            --glass: rgba(255, 255, 255, 0.08);
+            --neon: #00ffcc;
+            --accent: #ffa502;
+            --red: #ff4757;
+        }
+
+        * { box-sizing: border-box; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Outfit', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            overflow-x: hidden;
+            width: 100vw;
+        }
+
+        .home-card { 
+            background: var(--glass); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 40px; 
+            padding: 40px 20px;
+            width: 90%; 
+            max-width: 500px; 
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .logo {
+            font-family: 'Bungee', cursive;
+            font-size: 3.5rem;
+            color: var(--accent);
+            margin: 0 auto;
+            width: 100%;
+            line-height: 1.1;
+        }
+
+        .tagline {
+            opacity: 0.5;
+            letter-spacing: 3px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin: 10px 0 30px 0;
+            font-weight: 900;
+        }
+
+        .view-container {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            animation: slideUp 0.4s ease forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .active-view { display: flex !important; }
+
+        input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px;
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 1rem;
+            outline: none;
+            width: 100%;
+        }
+
+        .btn {
+            padding: 18px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Bungee', cursive;
+            font-size: 1rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .student-btn { background: var(--accent); color: #0f0f1a; }
+        .teacher-btn { background: var(--red); color: white; }
+        .secondary-btn { background: rgba(255,255,255,0.1); color: white; font-size: 0.8rem; margin-top: 10px;}
+
+        /* Folder Styling with Delete Support */
+        .folder-item {
+            background: rgba(255,255,255,0.05);
+            margin: 8px 0;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+        .folder-item:hover { border-color: var(--neon); background: rgba(255,255,255,0.08); }
+        
+        .folder-info { text-align: left; flex-grow: 1; cursor: pointer; }
+
+        .del-btn {
+            background: none;
+            border: none;
+            color: var(--red);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            opacity: 0.6;
+        }
+        .del-btn:hover { opacity: 1; transform: scale(1.2); }
+
+        .back-link { margin-top: 20px; font-size: 0.8rem; opacity: 0.5; cursor: pointer; }
+
+        @media (max-width: 480px) {
+            .logo { font-size: 2.2rem; }
+            .home-card { padding: 30px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="home-card">
+        <h1 class="logo">QUIRIOSITY</h1>
+        <div class="tagline" id="main-tagline">The Arena Experience</div>
+
+        <div id="view-home" class="view-container active-view">
+            <button class="btn student-btn" onclick="showView('view-student', 'PLAYER REGISTRATION')">
+                <span>🎮</span> ENTER ARENA
+            </button>
+            <button class="btn teacher-btn" style="margin-top:15px;" onclick="showView('view-library', 'TOPIC LIBRARY')">
+                <span>🛡️</span> TEACHER STUDIO
+            </button>
+        </div>
+
+        <div id="view-student" class="view-container">
+            <input type="text" placeholder="YOUR NICKNAME">
+            <input type="number" placeholder="ROOM CODE">
+            <button class="btn student-btn">JOIN LOBBY</button>
+            <p class="back-link" onclick="showView('view-home', 'THE ARENA EXPERIENCE')">← GO BACK</p>
+        </div>
+
+        <div id="view-library" class="view-container">
+            <div id="folder-display">
+                </div>
+            <button class="btn secondary-btn" onclick="addNewTopic()">+ NEW TOPIC</button>
+            <p class="back-link" onclick="showView('view-home', 'THE ARENA EXPERIENCE')">← LOGOUT</p>
+        </div>
+    </div>
+
+    <script>
+        // Memory Management
+        let appData = {
+            library: JSON.parse(localStorage.getItem('quirio_lib')) || {
+                "Mathematics": [{q: "1+1?", a: "2"}]
+            }
+        };
+
+        function showView(viewId, tagText) {
+            document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
+            document.getElementById(viewId).classList.add('active-view');
+            document.getElementById('main-tagline').innerText = tagText;
+            
+            if(viewId === 'view-library') renderLibrary();
+        }
+
+        function renderLibrary() {
+            const container = document.getElementById('folder-display');
+            container.innerHTML = ''; 
+
+            for (let topicName in appData.library) {
+                let div = document.createElement('div');
+                div.className = 'folder-item';
+                div.innerHTML = `
+                    <div class="folder-info" onclick="alert('Open Editor for: ${topicName}')">
+                        <strong>📂 ${topicName}</strong><br>
+                        <small style="opacity:0.6">${appData.library[topicName].length} Questions</small>
+                    </div>
+                    <button class="del-btn" onclick="deleteTopic('${topicName}')">✕</button>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function addNewTopic() {
+            let name = prompt("Enter Topic Name:");
+            if (name && name.trim() !== "") {
+                if (appData.library[name]) {
+                    alert("Topic already exists!");
+                } else {
+                    appData.library[name] = []; 
+                    saveData();
+                    renderLibrary();
+                }
+            }
+        }
+
+        function deleteTopic(name) {
+            if (confirm(`Delete "${name}" and all its questions?`)) {
+                delete appData.library[name];
+                saveData();
+                renderLibrary();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('quirio_lib', JSON.stringify(appData.library));
+        }
+
+        // Initialize Library on start
+        renderLibrary();
+    </script>
+</body>
+</html>
+
+        .tagline {
+            opacity: 0.5;
+            letter-spacing: 3px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin: 10px 0 30px 0;
+            font-weight: 900;
+        }
+
+        /* Views Container */
+        .view-container {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            animation: slideUp 0.4s ease forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .active-view { display: flex !important; }
+
+        /* Folders & Inputs */
+        input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px;
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 1rem;
+            outline: none;
+            width: 100%;
+        }
+
+        .btn {
+            padding: 18px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Bungee', cursive;
+            font-size: 1rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .student-btn { background: var(--accent); color: #0f0f1a; }
+        .teacher-btn { background: var(--red); color: white; }
+        .secondary-btn { background: rgba(255,255,255,0.1); color: white; font-size: 0.8rem; margin-top: 10px;}
+
+        .folder-item {
+            background: rgba(255,255,255,0.05);
+            margin: 5px 0;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-align: left;
+        }
+        .folder-item:hover { border-color: var(--neon); }
+
+        .back-link { margin-top: 20px; font-size: 0.8rem; opacity: 0.5; cursor: pointer; }
+
+        @media (max-width: 480px) {
+            .logo { font-size: 2.2rem; }
+            .home-card { padding: 30px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="home-card">
+        <h1 class="logo">QUIRIOSITY</h1>
+        <div class="tagline" id="main-tagline">The Arena Experience</div>
+
+        <div id="view-home" class="view-container active-view">
+            <button class="btn student-btn" onclick="showView('view-student', 'PLAYER REGISTRATION')">
+                <span>🎮</span> ENTER ARENA
+            </button>
+            <button class="btn teacher-btn" style="margin-top:15px;" onclick="showView('view-library', 'TOPIC LIBRARY')">
+                <span>🛡️</span> TEACHER STUDIO
+            </button>
+        </div>
+
+        <div id="view-student" class="view-container">
+            <input type="text" placeholder="YOUR NICKNAME">
+            <input type="number" placeholder="ROOM CODE">
+            <button class="btn student-btn">JOIN LOBBY</button>
+            <p class="back-link" onclick="showView('view-home', 'THE ARENA EXPERIENCE')">← GO BACK</p>
+        </div>
+
+        <div id="view-library" class="view-container">
+            <div id="folder-display">
+                <div class="folder-item">
+                    <strong>📂 Mathematics</strong><br>
+                    <small style="opacity:0.6">10 Questions</small>
+                </div>
+            </div>
+            <button class="btn secondary-btn" onclick="alert('Add Folder coming next!')">+ NEW TOPIC</button>
+            <p class="back-link" onclick="showView('view-home', 'THE ARENA EXPERIENCE')">← LOGOUT</p>
+        </div>
+    </div>
+
+    <script>
+        function showView(viewId, tagText) {
+            document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
+            document.getElementById(viewId).classList.add('active-view');
+            document.getElementById('main-tagline').innerText = tagText;
+        }
+    </script>
+</body>
+</html>
