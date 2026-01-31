@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiriosity</title>
+    <title>Quiriosity | Research Master</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;900&family=Bungee&display=swap');
@@ -16,10 +16,10 @@
         .active { display: flex; animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        /* WARNINGS & ALERTS */
+        /* WARNINGS */
         .error-shake { animation: shake 0.4s; border-color: var(--red) !important; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-        #alert-msg { color: var(--red); font-weight: bold; font-size: 0.8rem; display: none; margin-bottom: 10px; }
+        #alert-msg { color: var(--red); font-weight: bold; font-size: 0.8rem; display: none; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 8px; }
 
         .logo { font-family: 'Bungee'; color: var(--accent); font-size: 2.2rem; margin: 0; text-shadow: 2px 2px 0px #000; }
         button { padding: 15px; border-radius: 15px; border: none; font-family: 'Bungee'; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
@@ -27,11 +27,6 @@
         .btn-sec { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--accent); color: white; width: 100%; }
         .btn-del { color: var(--red); font-weight: bold; background: none; border: none; cursor: pointer; font-size: 1.1rem; }
 
-        /* FEEDBACK OVERLAY */
-        #feedback-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: var(--accent); color: #000; padding: 20px; border-radius: 20px; font-family: 'Bungee'; z-index: 100; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
-        #feedback-overlay.show { transform: translate(-50%, -50%) scale(1.2); }
-
-        /* PROGRESS & LOBBY */
         .progress-container { width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; }
         #progress-fill { height: 100%; width: 0%; background: var(--accent); transition: 0.4s; }
         .waiting-room { background: rgba(0,0,0,0.4); border-radius: 20px; padding: 15px; border: 1px dashed var(--accent); margin: 10px 0; }
@@ -44,8 +39,6 @@
         .bat-fill { background: var(--accent); width: 100%; position: absolute; bottom: 0; transition: height 0.7s; }
         .pizza-plate { width: 120px; height: 120px; background: #f3e5ab; border: 6px solid #d2691e; border-radius: 50%; position: relative; }
         .topping { position: absolute; font-size: 24px; }
-        #streak-flame { position: absolute; top: 0; right: 20%; font-size: 2rem; display: none; animation: flicker 0.5s infinite; }
-        @keyframes flicker { 0% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.8; transform: scale(1); } }
 
         input, select { padding: 12px; border-radius: 10px; border: 2px solid var(--accent); background: #000; color: #fff; text-align: center; width: calc(100% - 28px); }
         .leaderboard { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.75rem; text-align: left; }
@@ -53,11 +46,8 @@
 </head>
 <body>
 
-    <div id="feedback-overlay">GREAT JOB!</div>
-
     <div class="card" id="main-card">
         <h1 class="logo">QUIRIOSITY</h1>
-        
         <div id="alert-msg"></div>
 
         <div id="view-home" class="view active">
@@ -66,21 +56,16 @@
         </div>
 
         <div id="view-lib" class="view">
-            <h3 style="margin:0; color:var(--accent);">FOLDERS</h3>
             <div id="topics"></div>
             <button class="btn-main" onclick="addTopic()">+ CREATE FOLDER</button>
-            <button class="btn-sec" onclick="showView('view-home')">BACK</button>
+            <button class="btn-sec" onclick="disconnectAndHome()">BACK</button>
         </div>
 
         <div id="view-edit" class="view">
             <h3 id="edit-title" style="color:var(--accent); margin:0;">EDITOR</h3>
-            <div id="questions-list" style="max-height: 150px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px;"></div>
+            <div id="questions-list" style="max-height: 120px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px;"></div>
             <button class="btn-sec" onclick="addHybridQuestion()">+ ADD QUESTION</button>
-            <select id="game-select" style="width: 100%;">
-                <option value="forge">☀️ SOLAR FORGE</option>
-                <option value="battery">🔋 POWER CELL</option>
-                <option value="pizza">🍕 PIZZA PARTY</option>
-            </select>
+            <select id="game-select"><option value="forge">☀️ FORGE</option><option value="battery">🔋 CELL</option><option value="pizza">🍕 PIZZA</option></select>
             <input type="number" id="room-code" placeholder="ENTER ROOM CODE">
             <button class="btn-main" onclick="hostGame()">LAUNCH ARENA</button>
             <button class="btn-sec" onclick="showView('view-lib')">BACK</button>
@@ -90,49 +75,36 @@
             <input type="text" id="stu-name" placeholder="NICKNAME">
             <input type="number" id="join-code" placeholder="ROOM CODE">
             <button class="btn-main" onclick="joinGame()">ENTER ROOM</button>
-            <button class="btn-sec" onclick="showView('view-home')">BACK</button>
+            <button class="btn-sec" onclick="disconnectAndHome()">BACK</button>
         </div>
 
         <div id="view-arena" class="view">
             <div class="progress-container"><div id="progress-fill"></div></div>
-            <div id="personal-status">
-                <div id="streak-flame">🔥</div>
-            </div>
-            
+            <div id="personal-status"></div>
             <div id="teacher-lobby" style="display:none;">
-                <p style="color:var(--accent); font-weight: 900;">WAITING ROOM</p>
-                <div class="waiting-room">
-                    <div id="player-count" style="font-size: 0.8rem; margin-bottom: 5px;">0 Students</div>
-                    <div id="host-lobby-grid"></div>
-                </div>
+                <p id="player-count" style="font-size: 0.8rem;">0 Students</p>
+                <div class="waiting-room"><div id="host-lobby-grid"></div></div>
                 <button class="btn-main" onclick="teacherStart()">START SESSION</button>
             </div>
-
             <div id="quiz-zone" style="display:none;">
-                <p id="q-text" style="font-weight: 900; font-size: 1.1rem; min-height: 50px;"></p>
+                <p id="q-text" style="font-weight: 900;"></p>
                 <div id="mcq-zone" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
                 <div id="type-zone" style="display:none; flex-direction:column; gap:10px;">
-                    <input type="text" id="ans-input" placeholder="Type here...">
-                    <button class="btn-main" onclick="checkTyped()">SUBMIT</button>
+                    <input type="text" id="ans-input" placeholder="Type here..."><button class="btn-main" onclick="checkTyped()">SUBMIT</button>
                 </div>
             </div>
-
             <div id="teacher-results" style="display:none;">
-                <h4 style="margin:0; color:var(--accent);">RANKINGS</h4>
                 <table class="leaderboard"><tbody id="leaderboard-body"></tbody></table>
-                <button class="btn-sec" onclick="location.reload()" style="margin-top:20px">CLOSE SESSION</button>
+                <button class="btn-sec" onclick="disconnectAndHome()" style="margin-top:20px">CLOSE SESSION</button>
             </div>
         </div>
     </div>
 
     <script>
         let peer, conn, myRole, currentTopic, roomCode, selectedMode;
-        let db = JSON.parse(localStorage.getItem('quiriosity_v11')) || {}; 
+        let db = JSON.parse(localStorage.getItem('quiriosity_v12')) || {}; 
         let players = {}; 
         let playerCorrectCount = {};
-        let streak = 0;
-        const toppings = ['🍕','🍄','🫑','🧅','🥓','🍍','🌶️','🧀'];
-        const praises = ["GREAT JOB!", "AMAZING!", "ON FIRE!", "SMART!", "NICE!", "BOOM!"];
 
         function showView(id) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -141,16 +113,20 @@
             document.getElementById('alert-msg').style.display = 'none';
         }
 
-        function triggerWarning(msg) {
-            const card = document.getElementById('main-card');
-            const alert = document.getElementById('alert-msg');
-            alert.innerText = msg; alert.style.display = 'block';
-            card.classList.add('error-shake');
-            if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            setTimeout(() => card.classList.remove('error-shake'), 400);
+        // --- THE FIX: CLEAN UP OLD CONNECTIONS ---
+        function disconnectAndHome() {
+            if(peer) { peer.destroy(); }
+            location.reload(); // Hard refresh ensures PeerJS ID is released
         }
 
-        /* PERMANENT TOOLS */
+        function triggerWarning(msg) {
+            const alert = document.getElementById('alert-msg');
+            alert.innerText = msg; alert.style.display = 'block';
+            document.getElementById('main-card').classList.add('error-shake');
+            setTimeout(() => document.getElementById('main-card').classList.remove('error-shake'), 400);
+        }
+
+        /* DATA (Folder/Edit Always Here) */
         function renderLib() {
             const div = document.getElementById('topics'); div.innerHTML = '';
             Object.keys(db).forEach(t => {
@@ -167,29 +143,36 @@
             const div = document.getElementById('questions-list'); div.innerHTML = '';
             db[currentTopic].forEach((q, i) => { 
                 div.innerHTML += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #666; padding:5px;">
-                    <span>${i+1}. ${q.q}</span>
-                    <button onclick="deleteQuestion(${i})" class="btn-del" style="font-size:0.8rem">✕</button>
+                    <span>${i+1}. ${q.q}</span><button onclick="deleteQuestion(${i})" class="btn-del" style="font-size:0.8rem">✕</button>
                 </div>`; 
             });
         }
         function deleteQuestion(i) { db[currentTopic].splice(i, 1); save(); renderQuestions(); }
         function addHybridQuestion() {
-            let q = prompt("Question:"), a = prompt("Answer:"), w = prompt("Wrong (comma-separated). Empty for Typing mode:");
+            let q = prompt("Question:"), a = prompt("Answer:"), w = prompt("Wrong (comma-separated). Empty for Typing:");
             if(q && a){
                 let opts = (w && w.trim() !== "") ? w.split(',').concat(a).sort(() => Math.random() - 0.5) : [];
                 db[currentTopic].push({q, a, options: opts}); save(); renderQuestions();
             }
         }
-        function save() { localStorage.setItem('quiriosity_v11', JSON.stringify(db)); }
+        function save() { localStorage.setItem('quiriosity_v12', JSON.stringify(db)); }
 
-        /* PEER LOGIC */
+        /* HOST */
         function hostGame() {
             roomCode = document.getElementById('room-code').value;
-            if(!roomCode) return triggerWarning("ENTER A ROOM CODE!");
+            if(!roomCode) return triggerWarning("NEED A ROOM CODE!");
             selectedMode = document.getElementById('game-select').value;
+            
+            if(peer) peer.destroy();
             peer = new Peer('q-' + roomCode);
-            peer.on('open', () => { myRole='host'; showView('view-arena'); document.getElementById('teacher-lobby').style.display='block'; });
-            peer.on('error', (err) => { if(err.type === 'unavailable-id') triggerWarning("CODE ALREADY IN USE!"); });
+            
+            peer.on('open', () => { 
+                myRole='host'; showView('view-arena'); 
+                document.getElementById('teacher-lobby').style.display='block'; 
+            });
+            peer.on('error', (err) => {
+                if(err.type === 'unavailable-id') triggerWarning("CODE BUSY! TRY A NEW ONE.");
+            });
             peer.on('connection', c => {
                 c.on('data', d => {
                     if(d.type==='join'){ players[d.name]=0; playerCorrectCount[d.name]=0; updateLobby(); sync(); }
@@ -201,10 +184,36 @@
                 });
             });
         }
+
+        /* STUDENT */
+        function joinGame() {
+            let n = document.getElementById('stu-name').value, c = document.getElementById('join-code').value;
+            if(!n || !c) return triggerWarning("NAME & CODE REQUIRED!");
+            
+            if(peer) peer.destroy();
+            peer = new Peer();
+            
+            peer.on('open', () => {
+                conn = peer.connect('q-' + c);
+                conn.on('open', () => {
+                    myRole='student'; showView('view-arena');
+                    document.getElementById('q-text').innerText = "LINKED! WAIT FOR START...";
+                    conn.send({type:'join', name: n});
+                });
+                // If it can't connect within 4 seconds
+                setTimeout(() => { if(!conn || !conn.open) triggerWarning("ROOM NOT FOUND!"); }, 4000);
+                conn.on('data', d => {
+                    if(d.type==='start') startQuiz(d.questions, n);
+                    if(d.type==='sync') updateStudentFX(d.players[n], d.mode);
+                });
+            });
+        }
+
+        /* GAMEPLAY */
         function updateLobby() {
             const grid = document.getElementById('host-lobby-grid'), count = document.getElementById('player-count');
             grid.innerHTML = ''; Object.keys(players).forEach(n => grid.innerHTML += `<span class="player-tag">${n}</span>`);
-            count.innerText = `${Object.keys(players).length} Students`;
+            count.innerText = `${Object.keys(players).length} Students Joined`;
         }
         function teacherStart() {
             document.getElementById('teacher-lobby').style.display='none'; document.getElementById('teacher-results').style.display='block';
@@ -216,51 +225,18 @@
             sorted.forEach((n, i) => body.innerHTML += `<tr><td>#${i+1}</td><td>${n}</td><td style="color:var(--accent); text-align:right;">${playerCorrectCount[n]}</td></tr>`);
         }
         function sync() { Object.values(peer.connections).forEach(conns => conns.forEach(c => c.send({type:'sync', players: players, mode: selectedMode}))); }
-
-        /* STUDENT SIDE */
-        function joinGame() {
-            let n = document.getElementById('stu-name').value, c = document.getElementById('join-code').value;
-            if(!n || !c) return triggerWarning("NAME & CODE REQUIRED!");
-            peer = new Peer();
-            peer.on('open', () => {
-                conn = peer.connect('q-' + c);
-                conn.on('error', () => triggerWarning("INVALID ROOM CODE!"));
-                setTimeout(() => { if(!conn.open) triggerWarning("CAN'T FIND ROOM!"); }, 3000);
-                conn.on('open', () => {
-                    myRole='student'; showView('view-arena');
-                    document.getElementById('q-text').innerText = "WAITING FOR TEACHER...";
-                    conn.send({type:'join', name: n});
-                });
-                conn.on('data', d => {
-                    if(d.type==='start') startQuiz(d.questions, n);
-                    if(d.type==='sync') updateStudentFX(d.players[n], d.mode);
-                });
-            });
-        }
-
-        function showPraise() {
-            const over = document.getElementById('feedback-overlay');
-            over.innerText = praises[Math.floor(Math.random()*praises.length)];
-            over.classList.add('show');
-            setTimeout(() => over.classList.remove('show'), 800);
-        }
-
         function updateStudentFX(score, mode) {
             const box = document.getElementById('personal-status'); if(score === undefined) score = 0;
-            const flame = document.getElementById('streak-flame');
-            flame.style.display = streak >= 3 ? 'block' : 'none';
-            if(mode === 'forge') { let s = 60 + (score * 15); box.querySelector('.sun') || (box.innerHTML += '<div class="sun"></div>'); const sun = box.querySelector('.sun'); sun.style.width = s+'px'; sun.style.height = s+'px'; }
-            else if(mode === 'battery') { box.querySelector('.bat-shell') || (box.innerHTML += '<div class="bat-shell"><div class="bat-fill"></div></div>'); box.querySelector('.bat-fill').style.height = Math.min(score*10, 100)+'%'; }
+            if(mode === 'forge') { let s = 60 + (score * 15); box.innerHTML = `<div class="sun" style="width:${s}px; height:${s}px;"></div>`; }
+            else if(mode === 'battery') { box.innerHTML = `<div class="bat-shell"><div class="bat-fill" style="height:${Math.min(score*10, 100)}%;"></div></div>`; }
             else {
-                box.querySelector('.pizza-plate') || (box.innerHTML += '<div class="pizza-plate"></div>');
+                box.querySelector('.pizza-plate') || (box.innerHTML = `<div class="pizza-plate"></div>`);
                 const plate = box.querySelector('.pizza-plate');
-                if(plate.children.length < score) { let top = document.createElement('span'); top.className = 'topping'; top.innerText = toppings[Math.floor(Math.random()*toppings.length)]; top.style.left = Math.random()*85 + "px"; top.style.top = Math.random()*85 + "px"; plate.appendChild(top); }
+                if(plate.children.length < score) { let top = document.createElement('span'); top.className = 'topping'; top.innerText = '🍕'; top.style.left = Math.random()*85 + "px"; top.style.top = Math.random()*85 + "px"; plate.appendChild(top); }
             }
         }
-
         let currentQIdx = 0, stuQs = [], stuName = "", finalCorrect = 0;
-        function startQuiz(qs, name) { stuQs = qs; stuName = name; currentQIdx = 0; finalCorrect = 0; streak = 0; document.getElementById('quiz-zone').style.display='block'; nextQ(); }
-        
+        function startQuiz(qs, name) { stuQs = qs; stuName = name; currentQIdx = 0; finalCorrect = 0; document.getElementById('quiz-zone').style.display='block'; nextQ(); }
         function nextQ() {
             const mZone = document.getElementById('mcq-zone'), tZone = document.getElementById('type-zone');
             document.getElementById('progress-fill').style.width = ((currentQIdx/stuQs.length)*100) + "%";
@@ -272,16 +248,16 @@
                         let b = document.createElement('button'); b.className='btn-main'; b.innerText=opt; b.onclick=()=>check(opt); mZone.appendChild(b);
                     });
                 } else { mZone.style.display = 'none'; tZone.style.display = 'flex'; document.getElementById('ans-input').value = ''; }
-            } else { document.getElementById('quiz-zone').innerHTML = `<h2>DONE</h2><h1>Score: ${finalCorrect}</h1><button class="btn-main" onclick="location.reload()">EXIT</button>`; }
+            } else { document.getElementById('quiz-zone').innerHTML = `<h2>DONE</h2><h1>Score: ${finalCorrect}</h1><button class="btn-main" onclick="disconnectAndHome()">EXIT</button>`; }
         }
-
         function check(val) {
             let isCorrect = val.trim().toLowerCase() == stuQs[currentQIdx].a.trim().toLowerCase();
             conn.send({type:'score', name: stuName, correct: isCorrect});
-            if(isCorrect) { finalCorrect++; streak++; showPraise(); } else { streak = 0; }
+            if(isCorrect) { finalCorrect++; }
             currentQIdx++; setTimeout(nextQ, 500);
         }
         function checkTyped() { check(document.getElementById('ans-input').value); }
     </script>
 </body>
 </html>
+
