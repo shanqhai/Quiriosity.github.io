@@ -13,15 +13,12 @@
         
         .app-shell { 
             background: var(--card); 
-            width: 95vw; 
-            max-width: 500px; 
+            width: 95vw; max-width: 500px; 
             height: 92vh; 
             border: 4px solid var(--red); 
             border-radius: 24px; 
-            display: flex; 
-            flex-direction: column; 
-            position: relative; 
-            overflow: hidden; 
+            display: flex; flex-direction: column; 
+            position: relative; overflow: hidden; 
             box-shadow: 0 0 50px rgba(255, 71, 87, 0.3); 
         }
 
@@ -45,7 +42,6 @@
         input { padding: 12px; background: #111; border: 2px solid #444; color: white; border-radius: 10px; width: calc(100% - 28px); font-family: 'Outfit'; }
         .list-item { background: #333; padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--yellow); margin-bottom: 8px; }
         
-        .game-title { font-family: 'Bungee'; font-size: 1.5rem; text-align: center; color: var(--white); }
         .progress-track { background: #444; height: 12px; border-radius: 6px; overflow: hidden; margin: 10px 0; }
         .p-fill { height: 100%; background: var(--yellow); width: 0%; transition: 0.3s; }
         
@@ -57,9 +53,6 @@
         .mode-toggle div { flex: 1; text-align: center; font-size: 0.65rem; padding: 8px; cursor: pointer; border-radius: 8px; opacity: 0.5; }
         .mode-toggle .active-mode { background: #333; opacity: 1; color: var(--yellow); border: 1px solid var(--yellow); }
 
-        .score-card { background: #111; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 8px; border-left: 4px solid var(--green); }
-
-        /* Themes */
         .theme-solar { border-color: var(--orange) !important; }
         .theme-solar .p-fill { background: var(--orange); }
         .theme-power { border-color: var(--green) !important; }
@@ -84,7 +77,7 @@
             <button class="btn-yellow" onclick="addFolder()">+ CREATE NEW FOLDER</button>
         </div>
         <div id="folder-list" style="flex:1; overflow-y:auto; margin: 10px 0;"></div>
-        <button class="btn-red" style="background:#444; margin-bottom:10px; font-size:0.7rem;" onclick="resetToDefault()">RESTORE DEFAULT DATABASE</button>
+        <button class="btn-red" style="background:#444; margin-bottom:10px; font-size:0.7rem;" onclick="resetToDefault()">RESTORE FULL DATABASE</button>
         <button class="btn-ghost" onclick="nav('view-home')">BACK</button>
     </div>
 
@@ -100,23 +93,20 @@
             <input type="text" id="add-w" placeholder="Wrong Answers (comma separated)">
             <button class="btn-yellow" id="btn-save-q" onclick="saveQuestion()">+ SAVE TO LIST</button>
         </div>
-
         <div id="q-list" style="flex:1; overflow-y: auto; font-size:0.8rem; border-top:1px solid #444; padding-top:10px;"></div>
-        
-        <div style="font-size: 0.7rem; color:#888;">SELECT GAME MODE:</div>
+        <div style="font-size: 0.7rem; color:#888;">GAME MODE:</div>
         <div style="display:flex; gap:5px;">
             <button id="g-solar" class="btn-game" onclick="setManualGame('Solar Forge', 'theme-solar')">SOLAR</button>
             <button id="g-power" class="btn-game" onclick="setManualGame('Power Cell', 'theme-power')">POWER</button>
             <button id="g-pizza" class="btn-game selected" onclick="setManualGame('Pizza Party', '')">PIZZA</button>
         </div>
-        
         <input type="number" id="host-code" placeholder="ENTER ROOM CODE">
         <button class="btn-red" onclick="launchGame()">LAUNCH LOBBY</button>
         <button class="btn-ghost" onclick="nav('view-dash')">BACK</button>
     </div>
 
     <div id="view-lobby" class="view">
-        <h2 id="lobby-game-name" class="game-title">ARENA</h2>
+        <h2 id="lobby-game-name" style="text-align:center; font-family:'Bungee';">LOBBY</h2>
         <h3 id="room-display" style="color:var(--yellow); text-align:center; margin:0;">ROOM: --</h3>
         <div id="live-results" style="flex:1; overflow-y:auto; background:#111; padding:10px; border-radius:10px; font-size:0.8rem; margin:10px 0;"></div>
         <button class="btn-red" onclick="signalStart()">START SESSION</button>
@@ -131,20 +121,20 @@
     </div>
 
     <div id="view-arena" class="view">
-        <div id="game-badge" class="game-title">...</div>
+        <div id="game-badge" style="text-align:center; font-family:'Bungee'; color:var(--yellow);">ARENA</div>
         <div class="progress-track"><div id="p-bar" class="p-fill"></div></div>
-        <div id="q-area" style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <h3 id="q-text" style="text-align:center; min-height:80px; font-size:1.1rem; width:100%;">Waiting...</h3>
+        <div id="q-area" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+            <h3 id="q-text" style="text-align:center; min-height:80px; font-size:1.1rem;">...</h3>
             <div id="opt-grid" class="opt-grid"></div>
             <div id="id-input-box" style="display:none; width:100%; flex-direction:column; gap:10px;">
-                <input type="text" id="typed-ans" placeholder="Type your answer..." style="width:calc(100% - 28px); text-align:center;">
+                <input type="text" id="typed-ans" placeholder="Type answer..." style="width:calc(100% - 28px); text-align:center;">
                 <button class="btn-yellow" onclick="submitIdentification()">SUBMIT</button>
             </div>
         </div>
     </div>
 
     <div id="view-result" class="view centered-content" style="text-align:center;">
-        <h2 class="game-title" style="color:var(--yellow)">FINISHED!</h2>
+        <h2 style="font-family:'Bungee'; color:var(--yellow)">FINISHED!</h2>
         <div style="font-size:4rem; font-family:'Bungee';" id="final-score">0/0</div>
         <button class="btn-red" onclick="location.reload()">RETURN HOME</button>
     </div>
@@ -154,16 +144,16 @@
 const FULL_DB = {
     "Core Subjects": {
         "Effective Communication": [
-            {q:"Analyzing a text: identifying purpose helps determine if author wants to:", a:"Persuade, inform, or instruct", w:["Grammar","Visual Aids","Bias"]},
-            {q:"Interpreting meaning: audience affects how the writer chooses:", a:"Word choice and level of formality", w:["Weather","Main idea","Deadline"]},
+            {q:"Identifying purpose helps determine if author wants to:", a:"Persuade, inform, or instruct", w:["Grammar","Visual Aids","Bias"]},
+            {q:"Audience affects how the writer chooses:", a:"Word choice and level of formality", w:["Weather","Main idea","Deadline"]},
             {q:"Technical texts often avoid figurative language to:", a:"Provide clear and accurate information", w:["Emotional impact","Share opinions","Entertain teachers"]},
-            {q:"Which of these is NOT an example of a verbal communication skill?", a:"Eye contact", w:["Speed of speech","Language used","Volume of speech"]},
-            {q:"Body language, facial expressions, and silence are examples of:", a:"Active listening", w:["Open listening","Pretend listening","Clarity listening"]},
-            {q:"One of the best ways to show customers you are listening is:", a:"Appropriate eye contact", w:["Talking to others","Frowning","Asking to repeat"]},
+            {q:"Body language, facial expressions, and silence are examples of:", a:"Non-verbal communication", w:["Open listening","Pretend listening","Clarity listening"]},
             {q:"Exchanging messages between sender and receiver is:", a:"Communication", w:["Expression","Transmission","Interaction"]},
             {q:"Main purpose of feedback?", a:"To indicate if the message was understood", w:["To confuse sender","To entertain","To deliver new message"]},
+            {q:"One of the best ways to show customers you are listening is:", a:"Appropriate eye contact", w:["Talking to others","Frowning","Asking to repeat"]},
             {q:"What is the nature of communication?", a:"It is dynamic and continuous", w:["Random","One-sided","Always uses words"]},
-            {q:"Which function allows people to build relationships?", a:"Social Interaction", w:["Motivation","Information","Control"]}
+            {q:"Which function allows people to build relationships?", a:"Social Interaction", w:["Motivation","Information","Control"]},
+            {q:"The 'barrier' in communication that refers to noise is:", a:"Physical barrier", w:["Semantic","Emotional","Cultural"]}
         ],
         "General Mathematics": [
             {q:"Invest ₱1,000 and earn ₱50 interest. Total Maturity Value?", a:"₱1,050", w:["₱950","₱50","₱1,000"]},
@@ -175,7 +165,7 @@ const FULL_DB = {
             {q:"Which logical connector uses the word 'AND'?", a:"Conjunction", w:["Disjunction","Negation","Implication"]},
             {q:"If a statement P is True, what is its Negation (Not P)?", a:"False", w:["True","Maybe","Both"]},
             {q:"What is the symbol for the logical connector 'OR'?", a:"∨", w:["∧","→","~"]},
-            {q:"Paying for an item in small monthly amounts is an:", a:"Installment", w:["Donation","Instant payment","Tax"]}
+            {q:"The sequence 2, 4, 8, 16 is an example of:", a:"Geometric Sequence", w:["Arithmetic","Fibonacci","Prime"]}
         ],
         "General Science": [
             {q:"Which subsystem contains all the water on the planet?", a:"Hydrosphere", w:["Atmosphere","Geosphere","Biosphere"]},
@@ -203,15 +193,15 @@ const FULL_DB = {
         ],
         "Life & Career Skills": [
             {q:"Managing time effectively:", a:"Time Management", w:["Procrastination","Socializing","Multi-tasking"]},
-            {q:"Ability to adapt:", a:"Flexibility", w:["Rigidity","Stubbornness","Fixed Mindset"]},
+            {q:"Ability to adapt to change:", a:"Flexibility", w:["Rigidity","Stubbornness","Fixed Mindset"]},
             {q:"Working for a common goal:", a:"Collaboration", w:["Competition","Individualism","Leadership"]},
             {q:"First step in problem-solving:", a:"Identifying the problem", w:["Ignoring","Blaming","Asking"]},
             {q:"Understanding others' feelings:", a:"Empathy", w:["Sympathy","Apathy","Criticism"]},
-            {q:"Being on time:", a:"Punctuality", w:["Loudness","Dressing","Finishing"]},
-            {q:"Main purpose of a Resume:", a:"Summarize skills", w:["Hobbies","Social media","ID"]},
-            {q:"Control feelings/weaknesses:", a:"Self-discipline", w:["Waiting","Avoiding","Leading"]},
+            {q:"Being on time for work or school:", a:"Punctuality", w:["Loudness","Dressing","Finishing"]},
+            {q:"Main purpose of a Resume:", a:"Summarize skills/experience", w:["Hobbies","Social media","ID"]},
             {q:"SMART - 'A' stands for:", a:"Achievable", w:["Always","Active","Aggressive"]},
-            {q:"Active Listening key:", a:"Eye contact and nodding", w:["Lunch","Phone","Interrupting"]}
+            {q:"The ability to lead and motivate others:", a:"Leadership", w:["Following","Quietness","Laziness"]},
+            {q:"Maintaining a positive attitude at work:", a:"Professionalism", w:["Arrogance","Anger","Sarcasm"]}
         ]
     },
     "STEM Subjects": {
@@ -225,7 +215,7 @@ const FULL_DB = {
             {q:"Standard unit of energy and work:", a:"Joule", w:["Newton","Watt","Pascal"]},
             {q:"Quantity with magnitude and direction:", a:"Vector", w:["Scalar","Constant","Integer"]},
             {q:"If net force is zero, object is in:", a:"Equilibrium", w:["Motion","Acceleration","Freefall"]},
-            {q:"Rate at which work is done:", a:"Power", w:["Force","Momentum","Torque"]}
+            {q:"An object in motion stays in motion unless acted upon by a:", a:"Net Force", w:["Mass","Speed","Volume"]}
         ],
         "General Biology": [
             {q:"Powerhouse of the cell:", a:"Mitochondria", w:["Ribosomes","Lysosomes","Golgi"]},
@@ -235,21 +225,21 @@ const FULL_DB = {
             {q:"Gatekeeper of the cell:", a:"Cell Membrane", w:["Cell Wall","Cytoskeleton","Envelope"]},
             {q:"Eukaryotic cells feature:", a:"Have a nucleus", w:["Larger","Only DNA","Only membrane"]},
             {q:"Control center containing DNA:", a:"Nucleus", w:["Nucleolus","Rough ER","Smooth ER"]},
-            {q:"Transport requiring energy:", a:"Active Transport", w:["Passive","Diffusion","Osmosis"]},
-            {q:"Cell division for growth:", a:"Mitosis", w:["Meiosis","Binary Fission","Fertilization"]},
+            {q:"Transport requiring energy (ATP):", a:"Active Transport", w:["Passive","Diffusion","Osmosis"]},
+            {q:"Cell division for growth/repair:", a:"Mitosis", w:["Meiosis","Binary Fission","Fertilization"]},
             {q:"'Suicide Bag' of the cell:", a:"Lysosome", w:["Peroxisome","Vacuole","Golgi"]}
         ],
         "General Chemistry": [
             {q:"Smallest particle of an element:", a:"Atom", w:["Molecule","Compound","Proton"]},
-            {q:"Matter with definite shape:", a:"Solid", w:["Liquid","Gas","Plasma"]},
+            {q:"Matter with definite shape and volume:", a:"Solid", w:["Liquid","Gas","Plasma"]},
             {q:"Horizontal rows in Periodic Table:", a:"Periods", w:["Groups","Families","Columns"]},
             {q:"Chemical symbol for Gold:", a:"Au", w:["Ag","Gd","Go"]},
             {q:"Negative subatomic particle:", a:"Electron", w:["Proton","Neutron","Nucleolus"]},
             {q:"Bond where atoms share electrons:", a:"Covalent Bond", w:["Ionic","Metallic","Hydrogen"]},
-            {q:"Solution with pH of 2 is:", a:"Strongly Acidic", w:["Basic","Neutral","Weakly Basic"]},
+            {q:"Solution with pH of 7 is:", a:"Neutral", w:["Acidic","Basic","Bitter"]},
             {q:"Common name for H2O:", a:"Water", w:["Salt","Methane","Peroxide"]},
-            {q:"Matter cannot be created/destroyed:", a:"Law of Conservation of Mass", w:["Gravity","Definite","Avogadro"]},
-            {q:"Center of atom:", a:"Nucleus", w:["Shell","Orbit","Valance"]}
+            {q:"Center of the atom:", a:"Nucleus", w:["Shell","Orbit","Valance"]},
+            {q:"Atomic number represents the number of:", a:"Protons", w:["Neutrons","Electrons","Bonds"]}
         ],
         "Earth & Space Science": [
             {q:"Origin of the universe theory:", a:"Big Bang Theory", w:["Steady State","Nebular","Pulsating"]},
@@ -257,11 +247,11 @@ const FULL_DB = {
             {q:"Our galaxy:", a:"Milky Way", w:["Andromeda","Sombrero","Whirlpool"]},
             {q:"Closest star to Earth:", a:"The Sun", w:["Proxima Centauri","Sirius","Polaris"]},
             {q:"Force keeping planets in orbit:", a:"Gravity", w:["Friction","Magnetism","Inertia"]},
-            {q:"Dust/gas cloud birth of stars:", a:"Nebula", w:["Black Hole","Supernova","Asteroid"]},
             {q:"Layer containing Ozone:", a:"Stratosphere", w:["Troposphere","Mesosphere","Exosphere"]},
             {q:"Moon between Earth and Sun:", a:"Solar Eclipse", w:["Lunar","Equinox","Solstice"]},
             {q:"Ice/dust with 'tails':", a:"Comets", w:["Meteors","Asteroids","Satellites"]},
-            {q:"Earth revolution time:", a:"365.25 days", w:["24 hours","30 days","12 hours"]}
+            {q:"Earth revolution time:", a:"365.25 days", w:["24 hours","30 days","12 hours"]},
+            {q:"Largest planet in our solar system:", a:"Jupiter", w:["Saturn","Neptune","Uranus"]}
         ]
     },
     "ICT & Business": {
@@ -269,42 +259,42 @@ const FULL_DB = {
             {q:"Java is known for being:", a:"Platform-independent", w:["Dependent","Low-level","Hardware"]},
             {q:"Java source extension:", a:".java", w:[".jav",".class",".exe"]},
             {q:"Correct display output:", a:'System.out.println("Hello");', w:["print","echo","console.log"]},
-            {q:"Role of ICT in school:", a:"Improve efficiency", w:["Replace teachers","Limit","Fun"]},
             {q:"Symbol to end statement:", a:";", w:[":",",","."]},
             {q:"New line code:", a:'System.out.println("\\n");', w:["/n","\\t","nl"]},
             {q:"Output of print('A'); println('B');:", a:"AB", w:["A B","A\\nB","Error"]},
             {q:"Display Hello World:", a:'System.out.println("Hello World");', w:["print","log","write"]},
             {q:"5 + 10 result:", a:'15', w:["510","50","Error"]},
-            {q:"1 + 2 + '3':", a:"33", w:["6","123","Error"]}
+            {q:"1 + 2 + '3' (String Concatenation):", a:"33", w:["6","123","Error"]},
+            {q:"A container for data in programming:", a:"Variable", w:["Function","Loop","Class"]}
         ],
         "Bakery Operations": [
             {q:"Leavening agent for bread:", a:"Yeast", w:["Baking powder","Salt","Sugar"]},
             {q:"Bread internal temp:", a:"200–210°F", w:["180","190","220"]},
             {q:"Tool for flour accuracy:", a:"Kitchen scale", w:["Cup","Spoon","Rolling pin"]},
-            {q:"Function of sugar:", a:"Sweetness and browning", w:["Leavening","Gluten","Moisture"]},
-            {q:"Strengthens structure:", a:"Flour", w:["Fat","Eggs","Water"]},
+            {q:"Function of sugar in baking:", a:"Sweetness and browning", w:["Leavening","Gluten","Moisture"]},
+            {q:"Strengthens structure of bread:", a:"Flour", w:["Fat","Eggs","Water"]},
             {q:"Storage temp (Room):", a:"20–25°C", w:["0-5","30-35","50-55"]},
-            {q:"Common fat in baking:", a:"Margarine", w:["Olive oil","Water","Honey"]},
             {q:"Accurate measurement result:", a:"Consistent quality", w:["Faster rise","Less sugar","Sweeter"]},
-            {q:"Artisan bakery focus:", a:"Hand-made products", w:["Industrial","Home","Quick"]},
-            {q:"Ideal proofing environment:", a:"Warm and humid", w:["Cold/dry","Hot/dry","Ventilated"]}
+            {q:"Ideal proofing environment:", a:"Warm and humid", w:["Cold/dry","Hot/dry","Ventilated"]},
+            {q:"Process of making dough smooth and elastic:", a:"Kneading", w:["Whisking","Folding","Sifting"]},
+            {q:"Type of flour with highest protein:", a:"Bread Flour", w:["Cake Flour","All-purpose","Pastry"]}
         ],
         "Contemporary Literature": [
             {q:"Genre written on phones:", a:"Text Tula", w:["Blog","Flash Fiction","Hyper-poetry"]},
             {q:"Character of Flash Fiction:", a:"Extremely short story", w:["No ending","Long novel","Verse"]},
             {q:"Combines book/video/web:", a:"Digi-Fiction", w:["Manga","Doodle Fiction","E-book"]},
             {q:"Story via comic panels:", a:"Graphic Novel", w:["Text-talk","Hyper-poetry","Speculative"]},
-            {q:"Hyper-poetry navigation:", a:"Clicking digital links", w:["Turning pages","Audio","Movie"]},
             {q:"Japanese comic style:", a:"Manga", w:["Manhwa","Graphic Novel","Digi-fiction"]},
             {q:"'Blog' full name:", a:"Web Log", w:["Book","Best","Binary"]},
             {q:"Future/magical worlds:", a:"Speculative Fiction", w:["Non-Fiction","Biography","Memoir"]},
             {q:"Text-Talk Novel style:", a:"Chat logs", w:["Letters","Paragraphs","Sketches"]},
-            {q:"Creative Non-Fiction:", a:"True story/literary tech", w:["Fake story","Poem","Textbook"]}
+            {q:"Creative Non-Fiction:", a:"True story/literary tech", w:["Fake story","Poem","Textbook"]},
+            {q:"Poetry meant to be performed:", a:"Spoken Word", w:["Haiku","Sonnet","Text Tula"]}
         ],
         "Politics & Governance": [
             {q:"Supreme law of PH:", a:"1987 Constitution", w:["Civil Code","Magna Carta","Bill of Rights"]},
             {q:"Enforces laws:", a:"Executive Branch", w:["Legislative","Judicial","Military"]},
-            {q:"President's term:", a:"6 years", w:["4","8","10"]},
+            {q:"President's term in Philippines:", a:"6 years", w:["4","8","10"]},
             {q:"Congress composition:", a:"Senate and House", w:["Cabinet","Supreme Court","LGU"]},
             {q:"Minimum voting age:", a:"18 years old", w:["15","21","16"]},
             {q:"Reject a bill power:", a:"Veto", w:["Pardon","Impeachment","Appointment"]},
@@ -315,27 +305,27 @@ const FULL_DB = {
         ],
         "Basic Accounting": [
             {q:"Accounting Equation:", a:"Assets = Liabilities + Equity", w:["A=L-E","R=E","A+L=E"]},
-            {q:"Resources owned:", a:"Assets", w:["Liabilities","Expenses","Revenues"]},
+            {q:"Resources owned by a business:", a:"Assets", w:["Liabilities","Expenses","Revenues"]},
             {q:"Financial position report:", a:"Balance Sheet", w:["Income Statement","Cash Flow","Journal"]},
-            {q:"Left side of account:", a:"Debit", w:["Credit","Balance","Equity"]},
+            {q:"Left side of an account:", a:"Debit", w:["Credit","Balance","Equity"]},
             {q:"Debts or obligations:", a:"Liabilities", w:["Assets","Capital","Income"]},
-            {q:"Chronological recording:", a:"Journalizing", w:["Posting","Summarizing","Auditing"]},
+            {q:"Chronological recording of transactions:", a:"Journalizing", w:["Posting","Summarizing","Auditing"]},
             {q:"Providing services increases:", a:"Revenue", w:["Expense","Liability","Asset"]},
             {q:"Original entry book:", a:"General Journal", w:["Ledger","Worksheet","Trial"]},
-            {q:"Assets=100k, Liab=40k, Equity?:", a:"60,000", w:["140k","100k","40k"]},
-            {q:"Goal of accounting:", a:"Decision-making info", w:["Hide money","Count staff","Ads"]}
+            {q:"Goal of accounting:", a:"Decision-making info", w:["Hide money","Count staff","Ads"]},
+            {q:"Withdrawal of cash by owner decreases:", a:"Equity", w:["Liabilities","Revenue","Debt"]}
         ],
         "Organization & Management": [
-            {q:"Four main functions:", a:"Planning, Organizing, Leading, Controlling", w:["Buy/Sell","Type/File","Hire/Fire"]},
-            {q:"Setting goals:", a:"Planning", w:["Controlling","Staffing","Budgeting"]},
+            {q:"Four main functions of management:", a:"Planning, Organizing, Leading, Controlling", w:["Buy/Sell","Type/File","Hire/Fire"]},
+            {q:"Setting goals and ways to achieve them:", a:"Planning", w:["Controlling","Staffing","Budgeting"]},
             {q:"SWOT - 'T' stands for:", a:"Threats", w:["Time","Team","Tasks"]},
-            {q:"Decision-making (no consult):", a:"Autocratic", w:["Democratic","Laissez-faire","Participative"]},
+            {q:"Decision-making (no consultation):", a:"Autocratic", w:["Democratic","Laissez-faire","Participative"]},
             {q:"Top-level role:", a:"Long-term vision", w:["Daily supervision","Hiring","Repairs"]},
-            {q:"Chain of Command symbol:", a:"Solid vertical line", w:["Friendships","Salary","Exits"]},
             {q:"Monitoring performance:", a:"Controlling", w:["Planning","Brainstorming","Marketing"]},
-            {q:"Recruiting employees:", a:"Staffing", w:["Leading","Accounting","Organizing"]},
-            {q:"'Hands-off' style:", a:"Laissez-faire", w:["Dictatorial","Democratic","Bureaucratic"]},
-            {q:"Company purpose summary:", a:"Mission Statement", w:["Salary list","Office map","Secret code"]}
+            {q:"Recruiting and hiring employees:", a:"Staffing", w:["Leading","Accounting","Organizing"]},
+            {q:"'Hands-off' leadership style:", a:"Laissez-faire", w:["Dictatorial","Democratic","Bureaucratic"]},
+            {q:"Company purpose summary:", a:"Mission Statement", w:["Salary list","Office map","Secret code"]},
+            {q:"SWOT - 'W' stands for:", a:"Weaknesses", w:["Work","Wealth","Win"]}
         ]
     }
 };
