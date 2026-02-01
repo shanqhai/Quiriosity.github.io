@@ -17,56 +17,56 @@
         body { 
             background: var(--bg); color: var(--white); 
             font-family: 'Outfit', sans-serif; margin: 0; 
-            display: flex; justify-content: center; align-items: center; 
             height: 100dvh; width: 100vw; overflow: hidden; 
         }
         
         .app-shell { 
             background: var(--card); width: 100%; height: 100%; 
             border: 4px solid var(--red); display: flex; flex-direction: column; 
-            position: relative; overflow: hidden; transition: 0.3s;
         }
 
-        /* Themes */
+        /* Theme Overrides */
         .theme-solar { border-color: var(--orange) !important; --red: var(--orange); }
         .theme-power { border-color: var(--green) !important; --red: var(--green); }
 
         .header { background: var(--red); padding: 10px; text-align: center; border-bottom: 4px solid var(--yellow); flex-shrink: 0; }
         .logo { font-family: 'Bungee'; font-size: 1.5rem; color: var(--yellow); text-shadow: 2px 2px 0px #000; margin: 0; }
         
-        .view { display: none; flex: 1; padding: 15px; overflow: hidden; flex-direction: column; width: 100%; max-width: 1200px; margin: 0 auto; }
+        .view { display: none; flex: 1; padding: 15px; overflow: hidden; flex-direction: column; }
         .active { display: flex; }
 
-        /* Split Screen Layout for Tablet */
-        .split-layout { display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
-        @media (min-width: 768px) {
-            .split-layout { flex-direction: row; }
-            .side-editor { width: 350px; flex-shrink: 0; border-right: 1px solid #333; padding-right: 15px; }
-            .main-list { flex: 1; }
+        /* Split Layout Fix for Tablet */
+        .split-layout { display: flex; flex: 1; gap: 20px; overflow: hidden; }
+        .side-bar { width: 350px; display: flex; flex-direction: column; gap: 10px; border-right: 2px solid #333; padding-right: 15px; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        .scroll-area { flex: 1; overflow-y: auto; padding-right: 10px; }
+        .scroll-area::-webkit-scrollbar { width: 6px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: var(--yellow); border-radius: 10px; }
+
+        /* Game Canvas Styles */
+        #game-canvas { 
+            height: 150px; background: #000; border-radius: 20px; 
+            margin-bottom: 15px; display: flex; justify-content: center; 
+            align-items: center; font-size: 4rem; border: 3px dashed #333;
         }
 
-        .content-body { flex: 1; overflow-y: auto; padding-right: 5px; -webkit-overflow-scrolling: touch; }
-        .content-body::-webkit-scrollbar { width: 6px; }
-        .content-body::-webkit-scrollbar-thumb { background: var(--yellow); border-radius: 10px; }
-
-        .editor-box { background: #111; padding: 12px; border-radius: 15px; border: 1px solid #444; margin-bottom: 10px; }
-        button { font-family: 'Bungee'; border: none; padding: 12px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; transition: 0.1s; width: 100%; }
-        .btn-yellow { background: var(--yellow); color: #000; }
-        .btn-red { background: var(--red); color: #fff; }
-        .btn-ghost { background: transparent; border: 2px solid var(--yellow); color: var(--yellow); }
-        .btn-del { width: auto; background: transparent; color: var(--red); font-size: 1.2rem; padding: 0 10px; }
+        /* UI Elements */
+        .editor-box { background: #111; padding: 15px; border-radius: 15px; border: 1px solid #444; }
+        button { font-family: 'Bungee'; border: none; padding: 12px; border-radius: 12px; cursor: pointer; }
+        .btn-yellow { background: var(--yellow); color: #000; width: 100%; }
+        .btn-red { background: var(--red); color: #fff; width: 100%; }
+        .btn-ghost { background: transparent; border: 2px solid var(--yellow); color: var(--yellow); width: 100%; }
+        
+        .list-item { background: #222; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; margin-bottom: 8px; border-left: 5px solid var(--yellow); }
+        .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .opt-btn { background: #333; color: white; border: 2px solid #444; padding: 20px; font-size: 1rem; }
 
         input { padding: 12px; background: #000; border: 2px solid #333; color: white; border-radius: 10px; width: 100%; margin-bottom: 8px; }
-        .list-item { background: #222; padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--yellow); margin-bottom: 8px; }
         
-        .mode-toggle { display: flex; gap: 5px; background: #000; padding: 5px; border-radius: 10px; margin-bottom: 8px; }
-        .mode-toggle div { flex: 1; text-align: center; font-size: 0.6rem; padding: 8px; cursor: pointer; border-radius: 6px; opacity: 0.5; font-family: 'Bungee'; }
-        .mode-toggle .active-mode { background: #333; opacity: 1; color: var(--yellow); border: 1px solid var(--yellow); }
-
-        .progress-track { background: #333; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 15px; }
-        .p-fill { height: 100%; background: var(--yellow); width: 0%; transition: 0.4s; }
-        .opt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-        .opt-btn { background: #333; color: white; border: 2px solid #444; padding: 15px; text-align: left; border-radius: 12px; }
+        /* Progress Bar */
+        .progress-track { background: #333; height: 15px; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+        .p-fill { height: 100%; background: var(--yellow); width: 0%; transition: 0.5s; }
     </style>
 </head>
 <body>
@@ -75,97 +75,97 @@
     <div class="header"><h1 class="logo">QUIRIOSITY</h1></div>
 
     <div id="view-home" class="view active">
-        <div class="content-body" style="display:flex; flex-direction:column; justify-content:center; gap:20px;">
-            <button class="btn-yellow" style="height:120px; font-size:1.5rem;" onclick="nav('view-join')">STUDENT LOGIN</button>
-            <button class="btn-red" style="height:120px; font-size:1.5rem;" onclick="nav('view-dash')">TEACHER DASHBOARD</button>
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:20px; max-width:500px; margin:0 auto; width:100%;">
+            <button class="btn-yellow" style="height:150px; font-size:2rem;" onclick="nav('view-join')">STUDENT</button>
+            <button class="btn-red" style="height:150px; font-size:2rem;" onclick="nav('view-dash')">TEACHER</button>
         </div>
     </div>
 
     <div id="view-dash" class="view">
         <div class="split-layout">
-            <div class="side-editor">
-                <h3 style="color:var(--yellow); font-family:'Bungee';">FOLDERS</h3>
+            <div class="side-bar">
+                <h2 style="font-family:'Bungee'; color:var(--yellow);">FOLDERS</h2>
                 <div class="editor-box">
-                    <input type="text" id="new-cat" placeholder="Subject Name">
-                    <input type="text" id="new-sub" placeholder="Topic Name">
-                    <button class="btn-yellow" onclick="addFolder()">+ CREATE FOLDER</button>
+                    <input type="text" id="new-cat" placeholder="Subject (e.g. STEM)">
+                    <input type="text" id="new-sub" placeholder="Topic (e.g. Physics)">
+                    <button class="btn-yellow" onclick="addFolder()">CREATE FOLDER</button>
                 </div>
-                <button class="btn-ghost" onclick="nav('view-home')">BACK</button>
-                <button class="btn-red" style="margin-top:10px; background:#444; font-size:0.6rem;" onclick="resetToDefault()">RESTORE DEFAULTS</button>
+                <button class="btn-ghost" onclick="nav('view-home')">BACK TO HOME</button>
             </div>
-            <div class="main-list">
-                <div class="content-body" id="folder-list"></div>
+            <div class="main-content">
+                <div class="scroll-area" id="folder-list"></div>
             </div>
         </div>
     </div>
 
     <div id="view-edit" class="view">
         <div class="split-layout">
-            <div class="side-editor">
-                <h3 id="edit-title" style="color:var(--yellow); font-family:'Bungee';"></h3>
+            <div class="side-bar">
+                <h2 id="edit-title" style="font-family:'Bungee'; color:var(--yellow); margin:0;"></h2>
                 <div class="editor-box">
-                    <div class="mode-toggle">
-                        <div id="m-mc" class="active-mode" onclick="setEditMode('mc')">MULTIPLE CHOICE</div>
-                        <div id="m-id" onclick="setEditMode('id')">IDENTIFICATION</div>
-                    </div>
                     <input type="text" id="add-q" placeholder="Question">
                     <input type="text" id="add-a" placeholder="Correct Answer">
-                    <input type="text" id="add-w" placeholder="Wrong Answers (comma separated)">
-                    <button class="btn-yellow" id="btn-save-q" onclick="saveQuestion()">+ SAVE QUESTION</button>
+                    <input type="text" id="add-w" placeholder="Wrong Answers (comma-sep)">
+                    <button class="btn-yellow" onclick="saveQuestion()">SAVE QUESTION</button>
                 </div>
-                <div style="display:flex; gap:5px; margin-bottom:10px;">
-                    <button class="btn-game" onclick="setManualGame('Solar Forge', 'theme-solar')">SOLAR</button>
-                    <button class="btn-game" onclick="setManualGame('Power Cell', 'theme-power')">POWER</button>
-                    <button class="btn-game" onclick="setManualGame('Pizza Party', '')">PIZZA</button>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;">
+                    <button onclick="setManualGame('Solar','theme-solar')" style="background:var(--orange); font-size:0.6rem;">SOLAR</button>
+                    <button onclick="setManualGame('Power','theme-power')" style="background:var(--green); font-size:0.6rem;">POWER</button>
+                    <button onclick="setManualGame('Pizza','')" style="background:var(--red); font-size:0.6rem;">PIZZA</button>
                 </div>
                 <input type="number" id="host-code" placeholder="4-DIGIT ROOM CODE">
                 <button class="btn-red" onclick="launchGame()">LAUNCH ARENA</button>
-                <button class="btn-ghost" style="margin-top:10px;" onclick="nav('view-dash')">BACK</button>
+                <button class="btn-ghost" onclick="nav('view-dash')">BACK</button>
             </div>
-            <div class="main-list">
-                <div class="content-body" id="q-list"></div>
+            <div class="main-content">
+                <div class="scroll-area" id="q-list"></div>
             </div>
         </div>
     </div>
 
     <div id="view-lobby" class="view">
-        <h2 id="room-display" style="text-align:center; font-family:'Bungee'; color:var(--yellow);">ROOM: --</h2>
-        <div class="content-body" style="background:#111; border-radius:15px; padding:15px;">
-            <table style="width:100%; color:white;"><tbody id="live-results"></tbody></table>
+        <h2 id="room-display" style="text-align:center; font-family:'Bungee'; color:var(--yellow); font-size:2rem;">ROOM: --</h2>
+        <div class="scroll-area" style="background:#111; border-radius:20px; padding:20px;">
+            <h3 style="font-family:'Bungee'; border-bottom:2px solid #333;">CONNECTED STUDENTS:</h3>
+            <table style="width:100%; font-size:1.2rem; border-collapse:collapse;">
+                <tbody id="live-results"></tbody>
+            </table>
         </div>
-        <button class="btn-red" onclick="signalStart()">START SESSION</button>
-    </div>
-
-    <div id="view-join" class="view">
-        <div class="content-body" style="display:flex; flex-direction:column; justify-content:center;">
-            <input type="text" id="stu-name" placeholder="NICKNAME">
-            <input type="number" id="stu-code" placeholder="ROOM CODE">
-            <button class="btn-yellow" onclick="joinGame()">ENTER ARENA</button>
+        <div style="padding-top:20px; display:flex; gap:10px;">
+            <button class="btn-red" onclick="signalStart()">START SESSION</button>
+            <button class="btn-ghost" onclick="location.reload()">CANCEL</button>
         </div>
     </div>
 
     <div id="view-arena" class="view">
+        <div id="game-canvas">🍕</div>
         <div class="progress-track"><div id="p-bar" class="p-fill"></div></div>
-        <div class="content-body">
-            <h3 id="q-text" style="text-align:center; font-size:1.4rem;">...</h3>
+        <div class="scroll-area" style="text-align:center;">
+            <h2 id="q-text" style="font-size:1.8rem;">...</h2>
             <div id="opt-grid" class="opt-grid"></div>
-            <div id="id-input-box" style="display:none; flex-direction:column; gap:10px;">
-                <input type="text" id="typed-ans" placeholder="Type answer...">
-                <button class="btn-yellow" onclick="submitIdentification()">SUBMIT</button>
-            </div>
         </div>
     </div>
 
     <div id="view-result" class="view">
-        <div class="content-body" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <h2 style="font-family:'Bungee'; color:var(--yellow);">FINISHED!</h2>
-            <div style="font-size:4rem; font-family:'Bungee';" id="final-score">0/0</div>
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <h1 style="font-family:'Bungee'; color:var(--yellow); font-size:3rem;">ARENA COMPLETE</h1>
+            <div id="final-score" style="font-size:5rem; font-family:'Bungee';">0/0</div>
+            <button class="btn-red" style="max-width:300px;" onclick="location.reload()">EXIT ARENA</button>
         </div>
-        <button class="btn-red" onclick="location.reload()">EXIT</button>
+    </div>
+
+    <div id="view-join" class="view">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width:400px; margin:0 auto; width:100%;">
+            <input type="text" id="stu-name" placeholder="YOUR NICKNAME">
+            <input type="number" id="stu-code" placeholder="ROOM CODE">
+            <button class="btn-yellow" onclick="joinGame()">ENTER ARENA</button>
+            <button class="btn-ghost" style="margin-top:10px;" onclick="nav('view-home')">BACK</button>
+        </div>
     </div>
 </div>
 
 <script>
+// Database remains identical to your 150-question set
 const FULL_DB = {
     "Core Subjects": {
         "Effective Communication": [{q:"Identifying purpose helps determine if author wants to:", a:"Persuade, inform, or instruct", w:["Grammar","Visual Aids","Bias"]},{q:"Audience affects how the writer chooses:", a:"Word choice and level of formality", w:["Weather","Main idea","Deadline"]},{q:"Technical texts often avoid figurative language to:", a:"Provide clear and accurate information", w:["Emotional impact","Share opinions","Entertain teachers"]},{q:"Body language, facial expressions, and silence are examples of:", a:"Non-verbal communication", w:["Open listening","Pretend listening","Clarity listening"]},{q:"Exchanging messages between sender and receiver is:", a:"Communication", w:["Expression","Transmission","Interaction"]},{q:"Main purpose of feedback?", a:"To indicate if the message was understood", w:["To confuse sender","To entertain","To deliver new message"]},{q:"One of the best ways to show customers you are listening is:", a:"Appropriate eye contact", w:["Talking to others","Frowning","Asking to repeat"]},{q:"What is the nature of communication?", a:"It is dynamic and continuous", w:["Random","One-sided","Always uses words"]},{q:"Which function allows people to build relationships?", a:"Social Interaction", w:["Motivation","Information","Control"]},{q:"The 'barrier' in communication that refers to noise is:", a:"Physical barrier", w:["Semantic","Emotional","Cultural"]}],
@@ -192,8 +192,7 @@ const FULL_DB = {
 
 let db = JSON.parse(localStorage.getItem('q_db')) || FULL_DB;
 let peer, conn, connections = [], curSub = '', curCat = '', qIdx = 0, score = 0, activeQs = [];
-let manualGame = { name: 'Pizza Party', theme: '' };
-let editMode = 'mc', editingIndex = -1;
+let manualGame = { name: 'Pizza', theme: '' };
 
 function nav(id) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -201,51 +200,32 @@ function nav(id) {
     if(id === 'view-dash') renderFolders();
 }
 
-function save() { localStorage.setItem('q_db', JSON.stringify(db)); }
-function resetToDefault() { if(confirm("Reset database?")) { db = JSON.parse(JSON.stringify(FULL_DB)); save(); renderFolders(); }}
-
 function addFolder() {
-    const cat = document.getElementById('new-cat').value.trim();
-    const sub = document.getElementById('new-sub').value.trim();
-    if(cat && sub) { if(!db[cat]) db[cat] = {}; db[cat][sub] = []; save(); renderFolders(); }
+    const c = document.getElementById('new-cat').value, s = document.getElementById('new-sub').value;
+    if(c && s) { if(!db[c]) db[c] = {}; db[c][s] = []; save(); renderFolders(); }
 }
 
 function renderFolders() {
     const list = document.getElementById('folder-list'); list.innerHTML = '';
     Object.keys(db).forEach(cat => {
         Object.keys(db[cat]).forEach(sub => {
-            list.innerHTML += `<div class="list-item"><span onclick="openEditor('${cat}','${sub}')" style="flex:1; cursor:pointer"><strong>${sub}</strong><br><small>${cat}</small></span><button class="btn-del" onclick="delSub('${cat}','${sub}')">✕</button></div>`;
+            list.innerHTML += `<div class="list-item" onclick="openEditor('${cat}','${sub}')">
+                <span><strong>${sub}</strong><br><small>${cat}</small></span>
+                <button onclick="event.stopPropagation(); delSub('${cat}','${sub}')">✕</button>
+            </div>`;
         });
     });
 }
 
-function delSub(c, s) { if(confirm(`Delete ${s}?`)) { delete db[c][s]; save(); renderFolders(); }}
-
-function openEditor(cat, sub) {
-    curCat = cat; curSub = sub; document.getElementById('edit-title').innerText = sub;
-    clearEditor(); refreshQList(); nav('view-edit');
-}
-
-function setEditMode(m) { editMode = m; document.getElementById('m-mc').className = m==='mc'?'active-mode':''; document.getElementById('m-id').className = m==='id'?'active-mode':''; document.getElementById('add-w').style.display = m==='mc'?'block':'none'; }
-
-function editQ(i) {
-    editingIndex = i; const item = db[curCat][curSub][i];
-    document.getElementById('add-q').value = item.q; document.getElementById('add-a').value = item.a;
-    document.getElementById('add-w').value = item.w ? item.w.join(',') : '';
-    setEditMode(item.type || 'mc'); document.getElementById('btn-save-q').innerText = "✓ UPDATE QUESTION";
-}
-
+function delSub(c, s) { if(confirm("Delete folder?")) { delete db[c][s]; save(); renderFolders(); }}
+function openEditor(cat, sub) { curCat = cat; curSub = sub; document.getElementById('edit-title').innerText = sub; refreshQList(); nav('view-edit'); }
+function refreshQList() { const ql = document.getElementById('q-list'); ql.innerHTML = ''; db[curCat][curSub].forEach((q, i) => { ql.innerHTML += `<div class="list-item"><span>${i+1}. ${q.q}</span><button onclick="delQ(${i})">✕</button></div>`; }); }
+function delQ(i) { db[curCat][curSub].splice(i, 1); save(); refreshQList(); }
 function saveQuestion() {
     const q = document.getElementById('add-q').value, a = document.getElementById('add-a').value, w = document.getElementById('add-w').value;
-    if(!q || !a) return;
-    const newQ = { q, a, type: editMode, w: editMode === 'mc' ? w.split(',').map(s=>s.trim()) : [] };
-    if(editingIndex > -1) db[curCat][curSub][editingIndex] = newQ; else db[curCat][curSub].push(newQ);
-    save(); clearEditor(); refreshQList();
+    if(q && a) { db[curCat][curSub].push({q, a, w: w.split(',')}); save(); refreshQList(); }
 }
-
-function clearEditor() { document.getElementById('add-q').value = ''; document.getElementById('add-a').value = ''; document.getElementById('add-w').value = ''; editingIndex = -1; document.getElementById('btn-save-q').innerText = "+ SAVE QUESTION"; }
-function refreshQList() { const ql = document.getElementById('q-list'); ql.innerHTML = ''; db[curCat][curSub].forEach((q, i) => { ql.innerHTML += `<div class="list-item"><span onclick="editQ(${i})" style="flex:1; cursor:pointer">${i+1}. ${q.q}</span><button class="btn-del" onclick="delQ(${i})">✕</button></div>`; }); }
-function delQ(i) { db[curCat][curSub].splice(i, 1); save(); refreshQList(); }
+function save() { localStorage.setItem('q_db', JSON.stringify(db)); }
 
 function setManualGame(n, t) { manualGame = { name: n, theme: t }; document.getElementById('main-shell').className = "app-shell " + t; }
 
@@ -254,7 +234,11 @@ function launchGame() {
     if(!code) return alert("Enter Code!");
     peer = new Peer('q-' + code);
     peer.on('open', () => { nav('view-lobby'); document.getElementById('room-display').innerText = "ROOM: " + code; });
-    peer.on('connection', c => { connections.push(c); c.on('data', d => { if(d.type==='res') document.getElementById('live-results').innerHTML += `<tr><td style="padding:10px;">${d.name}</td><td style="padding:10px; text-align:right;"><strong>${d.score}/${d.total}</strong></td></tr>`; }); });
+    peer.on('connection', c => { 
+        c.on('open', () => { document.getElementById('live-results').innerHTML += `<tr id="row-${c.peer}"><td>NEW STUDENT</td><td style="text-align:right">WAITING...</td></tr>`; });
+        c.on('data', d => { if(d.type==='res') document.getElementById(`row-${c.peer}`).innerHTML = `<td>${d.name}</td><td style="text-align:right"><strong>${d.score}/${d.total}</strong></td>`; });
+        connections.push(c);
+    });
 }
 
 function joinGame() {
@@ -271,25 +255,29 @@ function signalStart() { connections.forEach(c => c.send({type:'start', qs: db[c
 
 function startQuiz(n) { qIdx = 0; score = 0; document.getElementById('main-shell').className = "app-shell " + manualGame.theme; showQ(n); }
 
-function showQ(n) {
-    if(qIdx >= activeQs.length) { conn.send({type:'res', name:n, score:score, total:activeQs.length}); nav('view-result'); document.getElementById('final-score').innerText = `${score}/${activeQs.length}`; return; }
-    const q = activeQs[qIdx]; document.getElementById('q-text').innerText = q.q;
-    document.getElementById('p-bar').style.width = (qIdx/activeQs.length)*100 + "%";
-    const grid = document.getElementById('opt-grid'), idBox = document.getElementById('id-input-box');
-    grid.innerHTML = ''; idBox.style.display = 'none';
-    if(q.type === 'id') { idBox.style.display = 'flex'; document.getElementById('typed-ans').value = ''; }
-    else {
-        [q.a, ...q.w].sort(()=>Math.random()-0.5).forEach(o => {
-            const b = document.createElement('button'); b.className = 'opt-btn'; b.innerText = o;
-            b.onclick = () => { if(o === q.a) score++; qIdx++; showQ(n); };
-            grid.appendChild(b);
-        });
+function updateVisual() {
+    const canvas = document.getElementById('game-canvas');
+    if(manualGame.name === 'Pizza') {
+        const toppings = ['🍕','🍕','🍄','🍅','🥓','🧀','🥬'];
+        canvas.innerText = toppings[score % toppings.length];
+    } else if(manualGame.name === 'Power') {
+        canvas.innerText = score > 5 ? '🔋' : '🪫';
+    } else {
+        canvas.innerText = '☀️';
     }
 }
 
-function submitIdentification() {
-    if(document.getElementById('typed-ans').value.trim().toLowerCase() === activeQs[qIdx].a.toLowerCase()) score++;
-    qIdx++; showQ(document.getElementById('stu-name').value || "Guest");
+function showQ(n) {
+    updateVisual();
+    if(qIdx >= activeQs.length) { conn.send({type:'res', name:n, score:score, total:activeQs.length}); nav('view-result'); document.getElementById('final-score').innerText = `${score}/${activeQs.length}`; return; }
+    const q = activeQs[qIdx]; document.getElementById('q-text').innerText = q.q;
+    document.getElementById('p-bar').style.width = (qIdx/activeQs.length)*100 + "%";
+    const grid = document.getElementById('opt-grid'); grid.innerHTML = '';
+    [q.a, ...q.w].sort(()=>Math.random()-0.5).forEach(o => {
+        const b = document.createElement('button'); b.className = 'opt-btn'; b.innerText = o;
+        b.onclick = () => { if(o === q.a) score++; qIdx++; showQ(n); };
+        grid.appendChild(b);
+    });
 }
 </script>
 </body>
