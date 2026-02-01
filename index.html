@@ -7,60 +7,68 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;700&display=swap');
-        :root { --bg: #1a1a1a; --card: #252525; --red: #ff4757; --yellow: #ffcc00; --white: #ffffff; --green: #2ecc71; --orange: #ffa502; }
+        :root { --bg: #0f0f0f; --card: #1a1a1a; --red: #ff4757; --yellow: #ffcc00; --white: #ffffff; --green: #2ecc71; --orange: #ffa502; }
         
+        * { box-sizing: border-box; }
         body { background: var(--bg); color: var(--white); font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden; }
         
+        /* UNIVERSAL LAYOUT: Removes the "mobile shell" feel on larger screens */
         .app-shell { 
-            background: var(--card); width: 95vw; max-width: 500px; height: 95vh; max-height: 850px; 
-            border: 4px solid var(--red); border-radius: 24px; display: flex; flex-direction: column; 
-            position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(255, 71, 87, 0.3); 
+            background: var(--card); width: 100%; height: 100%; 
+            border: 6px solid var(--red); display: flex; flex-direction: column; 
+            position: relative; overflow: hidden; 
         }
 
         .header { background: var(--red); padding: 12px; text-align: center; border-bottom: 4px solid var(--yellow); flex-shrink: 0; z-index: 10; }
-        .logo { font-family: 'Bungee'; font-size: 1.5rem; color: var(--yellow); text-shadow: 2px 2px 0px #000; margin: 0; }
+        .logo { font-family: 'Bungee'; font-size: clamp(1.2rem, 4vw, 1.8rem); color: var(--yellow); text-shadow: 2px 2px 0px #000; margin: 0; }
         
-        .view { display: none; flex: 1; padding: 15px; overflow: hidden; flex-direction: column; }
+        .view { display: none; flex: 1; padding: 20px; overflow: hidden; flex-direction: column; max-width: 1000px; margin: 0 auto; width: 100%; }
         .active { display: flex; }
         
-        /* The Secret Sauce: Middle content scrolls, Footer stays put */
-        .content-body { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .content-body { flex: 1; overflow-y: auto; padding-bottom: 20px; scrollbar-width: thin; }
         .content-body::-webkit-scrollbar { width: 6px; }
         .content-body::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
 
-        .view-footer { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding: 10px 0; border-top: 1px solid #333; margin-top: auto; }
+        .view-footer { flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; padding: 15px 0; border-top: 2px solid #333; }
         
-        button { font-family: 'Bungee'; border: none; padding: 14px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; width: 100%; transition: transform 0.1s; }
+        /* GAME VISUALS */
+        #game-canvas { height: clamp(100px, 20vh, 200px); width: 100%; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 15px; background: #000; border-radius: 20px; overflow: hidden; border: 2px solid #333; }
+        .sun { width: 80px; height: 80px; background: radial-gradient(#fff, #ffcc00, #ff4700); border-radius: 50%; box-shadow: 0 0 50px #ff4700; transition: 0.5s; }
+        .battery { width: 120px; height: 60px; border: 4px solid #fff; border-radius: 10px; position: relative; padding: 5px; }
+        .battery::after { content: ''; position: absolute; right: -12px; top: 15px; width: 8px; height: 25px; background: #fff; border-radius: 0 5px 5px 0; }
+        .bat-fill { height: 100%; background: var(--green); width: 0%; transition: 0.5s; }
+        .pizza-crust { width: 100px; height: 100px; background: #f39c12; border: 6px solid #d35400; border-radius: 50%; position: relative; }
+        .topping { position: absolute; width: 15px; height: 15px; background: #c0392b; border-radius: 50%; border: 2px solid #000; }
+
+        button { font-family: 'Bungee'; border: none; padding: 15px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; transition: 0.1s; }
         button:active { transform: scale(0.96); }
-        .btn-yellow { background: var(--yellow); color: #000; }
-        .btn-red { background: var(--red); color: #fff; }
-        .btn-ghost { background: transparent; border: 2px solid var(--yellow); color: var(--yellow); }
+        .btn-yellow { background: var(--yellow); color: #000; width: 100%; }
+        .btn-red { background: var(--red); color: #fff; width: 100%; }
+        .btn-ghost { background: transparent; border: 2px solid var(--yellow); color: var(--yellow); width: 100%; }
         .btn-game { border: 2px solid #555; background: #333; color: white; padding: 8px; flex: 1; font-size: 0.6rem; }
         .btn-game.selected { border-color: var(--yellow); background: #444; color: var(--yellow); }
-        .btn-del { width: auto; background: transparent; color: var(--red); font-size: 1.1rem; padding: 0 10px; box-shadow: none; }
+        .btn-del { width: auto; background: transparent; color: var(--red); font-size: 1.2rem; padding: 0 10px; }
 
-        input { padding: 12px; background: #111; border: 2px solid #444; color: white; border-radius: 10px; width: calc(100% - 28px); font-family: 'Outfit'; margin-bottom: 8px; }
-        .list-item { background: #333; padding: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--yellow); margin-bottom: 8px; }
+        input { padding: 15px; background: #111; border: 2px solid #444; color: white; border-radius: 12px; width: 100%; font-family: 'Outfit'; margin-bottom: 10px; font-size: 1rem; }
+        .list-item { background: #222; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 8px solid var(--yellow); margin-bottom: 10px; }
         
         .leaderboard { width: 100%; border-collapse: collapse; }
-        .leaderboard th { text-align: left; color: var(--yellow); border-bottom: 2px solid #444; padding: 8px; font-family: 'Bungee'; }
-        .leaderboard td { padding: 10px 8px; border-bottom: 1px solid #333; }
+        .leaderboard th { text-align: left; color: var(--yellow); border-bottom: 2px solid #444; padding: 12px; font-family: 'Bungee'; }
+        .leaderboard td { padding: 12px; border-bottom: 1px solid #333; }
 
-        .progress-track { background: #444; height: 14px; border-radius: 7px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+        .progress-track { background: #333; height: 16px; border-radius: 8px; overflow: hidden; margin-bottom: 15px; }
         .p-fill { height: 100%; background: var(--yellow); width: 0%; transition: 0.4s; }
         
-        .opt-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; padding-bottom: 20px; }
-        .opt-btn { background: #333; color: white; border: 2px solid #555; text-align: left; font-family: 'Outfit'; font-weight: bold; padding: 16px; border-radius: 12px; }
+        .opt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; width: 100%; padding-bottom: 20px; }
+        .opt-btn { background: #333; color: white; border: 2px solid #555; text-align: left; padding: 20px; border-radius: 15px; font-weight: bold; font-size: 1.1rem; }
 
-        .editor-box { background: #1a1a1a; padding: 12px; border-radius: 15px; border: 1px solid #444; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; margin-bottom: 10px; }
-        .mode-toggle { display: flex; gap: 5px; background: #111; padding: 5px; border-radius: 10px; }
-        .mode-toggle div { flex: 1; text-align: center; font-size: 0.6rem; padding: 8px; cursor: pointer; border-radius: 8px; opacity: 0.5; }
+        .editor-box { background: #111; padding: 15px; border-radius: 15px; border: 1px solid #444; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .mode-toggle { display: flex; gap: 5px; background: #000; padding: 5px; border-radius: 10px; }
+        .mode-toggle div { flex: 1; text-align: center; font-size: 0.7rem; padding: 10px; cursor: pointer; border-radius: 8px; opacity: 0.5; font-family: 'Bungee'; }
         .mode-toggle .active-mode { background: #333; opacity: 1; color: var(--yellow); border: 1px solid var(--yellow); }
 
         .theme-solar { border-color: var(--orange) !important; }
-        .theme-solar .p-fill { background: var(--orange); }
         .theme-power { border-color: var(--green) !important; }
-        .theme-power .p-fill { background: var(--green); }
     </style>
 </head>
 <body>
@@ -69,40 +77,39 @@
     <div class="header"><h1 class="logo">QUIRIOSITY</h1></div>
 
     <div id="view-home" class="view active">
-        <div class="content-body" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:20px; text-align:center;">
-            <div style="font-family:'Bungee'; color:var(--yellow); font-size:1.2rem; margin-bottom:10px;">WELCOME TO THE ARENA</div>
-            <button class="btn-yellow" style="height:80px; font-size:1.1rem;" onclick="nav('view-join')">STUDENT LOGIN</button>
-            <button class="btn-red" style="height:80px; font-size:1.1rem;" onclick="nav('view-dash')">TEACHER DASHBOARD</button>
+        <div class="content-body" style="display:flex; flex-direction:column; justify-content:center; gap:20px;">
+            <button class="btn-yellow" style="height:120px; font-size:1.4rem;" onclick="nav('view-join')">STUDENT LOGIN</button>
+            <button class="btn-red" style="height:120px; font-size:1.4rem;" onclick="nav('view-dash')">TEACHER DASHBOARD</button>
         </div>
     </div>
 
     <div id="view-dash" class="view">
-        <h2 style="color:var(--yellow); margin:0 0 10px 0; font-size:1.1rem;">FOLDERS</h2>
+        <h2 style="color:var(--yellow); font-family:'Bungee';">MY FOLDERS</h2>
         <div class="editor-box">
-            <input type="text" id="new-cat" placeholder="Subject (e.g. STEM)">
-            <input type="text" id="new-sub" placeholder="Topic (e.g. Physics)">
+            <input type="text" id="new-cat" placeholder="Subject Name">
+            <input type="text" id="new-sub" placeholder="Topic Name">
             <button class="btn-yellow" onclick="addFolder()">+ CREATE NEW FOLDER</button>
         </div>
         <div class="content-body" id="folder-list"></div>
         <div class="view-footer">
-            <button class="btn-red" style="background:#444; font-size:0.65rem;" onclick="resetToDefault()">RESTORE FULL DATABASE</button>
+            <button class="btn-red" style="background:#444; font-size:0.7rem;" onclick="resetToDefault()">RESTORE FULL DATABASE</button>
             <button class="btn-ghost" onclick="nav('view-home')">BACK TO HOME</button>
         </div>
     </div>
 
     <div id="view-edit" class="view">
-        <h2 id="edit-title" style="color:var(--yellow); margin:0 0 10px 0; font-size:1rem; text-transform:uppercase;"></h2>
+        <h2 id="edit-title" style="color:var(--yellow); font-family:'Bungee';"></h2>
         <div class="editor-box">
             <div class="mode-toggle">
                 <div id="m-mc" class="active-mode" onclick="setEditMode('mc')">MULTIPLE CHOICE</div>
                 <div id="m-id" onclick="setEditMode('id')">IDENTIFICATION</div>
             </div>
-            <input type="text" id="add-q" placeholder="Question?">
+            <input type="text" id="add-q" placeholder="Question">
             <input type="text" id="add-a" placeholder="Correct Answer">
-            <input type="text" id="add-w" placeholder="Wrong Answers (comma separated)">
+            <input type="text" id="add-w" placeholder="Wrong Answers (separate with commas)">
             <button class="btn-yellow" id="btn-save-q" onclick="saveQuestion()">+ SAVE QUESTION</button>
         </div>
-        <div class="content-body" id="q-list" style="border-top:1px solid #444; padding-top:10px;"></div>
+        <div class="content-body" id="q-list"></div>
         <div class="view-footer">
             <div style="font-size: 0.6rem; color:#888;">SELECT THEME:</div>
             <div style="display:flex; gap:5px; margin-bottom:5px;">
@@ -110,95 +117,86 @@
                 <button id="g-power" class="btn-game" onclick="setManualGame('Power Cell', 'theme-power')">POWER</button>
                 <button id="g-pizza" class="btn-game selected" onclick="setManualGame('Pizza Party', '')">PIZZA</button>
             </div>
-            <input type="number" id="host-code" placeholder="ENTER ROOM CODE">
-            <button class="btn-red" onclick="launchGame()">LAUNCH LOBBY</button>
+            <input type="number" id="host-code" placeholder="4-DIGIT ROOM CODE">
+            <button class="btn-red" onclick="launchGame()">LAUNCH ARENA</button>
             <button class="btn-ghost" onclick="nav('view-dash')">BACK</button>
         </div>
     </div>
 
     <div id="view-lobby" class="view">
-        <h2 style="text-align:center; font-family:'Bungee'; margin:0; font-size:1.2rem;">LOBBY</h2>
-        <h3 id="room-display" style="color:var(--yellow); text-align:center; margin:5px 0;">ROOM: --</h3>
-        <div class="content-body" style="background:#111; padding:10px; border-radius:12px;">
+        <h2 id="room-display" style="text-align:center; font-family:'Bungee'; color:var(--yellow);">ROOM: --</h2>
+        <div class="content-body" style="background:#111; padding:15px; border-radius:20px;">
             <table class="leaderboard">
                 <thead><tr><th>PLAYER</th><th>SCORE</th></tr></thead>
                 <tbody id="live-results"></tbody>
             </table>
         </div>
         <div class="view-footer">
-            <button class="btn-red" onclick="signalStart()">START SESSION</button>
+            <button class="btn-red" onclick="signalStart()">START CLASS SESSION</button>
             <button class="btn-ghost" onclick="location.reload()">CANCEL</button>
         </div>
     </div>
 
     <div id="view-join" class="view">
-        <div class="content-body" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px;">
-            <div style="font-family:'Bungee'; color:var(--yellow); margin-bottom:10px;">ENTER THE ARENA</div>
+        <div class="content-body" style="display:flex; flex-direction:column; justify-content:center;">
             <input type="text" id="stu-name" placeholder="YOUR NICKNAME">
             <input type="number" id="stu-code" placeholder="ROOM CODE">
-            <button class="btn-yellow" style="margin-top:10px;" onclick="joinGame()">ENTER GAME</button>
+            <button class="btn-yellow" onclick="joinGame()">ENTER ARENA</button>
         </div>
-        <div class="view-footer">
-            <button class="btn-ghost" onclick="nav('view-home')">BACK</button>
-        </div>
+        <div class="view-footer"><button class="btn-ghost" onclick="nav('view-home')">BACK</button></div>
     </div>
 
     <div id="view-arena" class="view">
-        <div id="game-badge" style="text-align:center; font-family:'Bungee'; color:var(--yellow); font-size:1rem;">ARENA</div>
         <div class="progress-track"><div id="p-bar" class="p-fill"></div></div>
+        <div id="game-canvas"></div>
         <div class="content-body">
-            <h3 id="q-text" style="text-align:center; min-height:60px; font-size:1.1rem; margin:10px 0 20px 0; line-height:1.3;">...</h3>
+            <h3 id="q-text" style="text-align:center; font-size:1.4rem;">...</h3>
             <div id="opt-grid" class="opt-grid"></div>
-            <div id="id-input-box" style="display:none; width:100%; flex-direction:column; gap:10px;">
-                <input type="text" id="typed-ans" placeholder="Type here..." style="width:calc(100% - 28px); text-align:center; height:50px;">
+            <div id="id-input-box" style="display:none; flex-direction:column; gap:10px;">
+                <input type="text" id="typed-ans" placeholder="Type answer..." style="text-align:center;">
                 <button class="btn-yellow" onclick="submitIdentification()">SUBMIT</button>
             </div>
         </div>
     </div>
 
     <div id="view-result" class="view">
-        <div class="content-body" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-            <h2 style="font-family:'Bungee'; color:var(--yellow); margin:0;">FINISHED!</h2>
-            <p>Your Final Score:</p>
-            <div style="font-size:4rem; font-family:'Bungee';" id="final-score">0/0</div>
+        <div class="content-body" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <h2 style="font-family:'Bungee'; color:var(--yellow);">FINISHED!</h2>
+            <div style="font-size:5rem; font-family:'Bungee';" id="final-score">0/0</div>
         </div>
-        <div class="view-footer">
-            <button class="btn-red" onclick="location.reload()">RETURN HOME</button>
-        </div>
+        <div class="view-footer"><button class="btn-red" onclick="location.reload()">EXIT ARENA</button></div>
     </div>
 </div>
 
 <script>
-// DATABASE remains identical - truncated here for brevity but keep your FULL_DB from before
 const FULL_DB = {
     "Core Subjects": {
         "Effective Communication": [{q:"Identifying purpose helps determine if author wants to:", a:"Persuade, inform, or instruct", w:["Grammar","Visual Aids","Bias"]},{q:"Audience affects how the writer chooses:", a:"Word choice and level of formality", w:["Weather","Main idea","Deadline"]},{q:"Technical texts often avoid figurative language to:", a:"Provide clear and accurate information", w:["Emotional impact","Share opinions","Entertain teachers"]},{q:"Body language, facial expressions, and silence are examples of:", a:"Non-verbal communication", w:["Open listening","Pretend listening","Clarity listening"]},{q:"Exchanging messages between sender and receiver is:", a:"Communication", w:["Expression","Transmission","Interaction"]},{q:"Main purpose of feedback?", a:"To indicate if the message was understood", w:["To confuse sender","To entertain","To deliver new message"]},{q:"One of the best ways to show customers you are listening is:", a:"Appropriate eye contact", w:["Talking to others","Frowning","Asking to repeat"]},{q:"What is the nature of communication?", a:"It is dynamic and continuous", w:["Random","One-sided","Always uses words"]},{q:"Which function allows people to build relationships?", a:"Social Interaction", w:["Motivation","Information","Control"]},{q:"The 'barrier' in communication that refers to noise is:", a:"Physical barrier", w:["Semantic","Emotional","Cultural"]}],
         "General Mathematics": [{q:"Invest ₱1,000 and earn ₱50 interest. Total Maturity Value?", a:"₱1,050", w:["₱950","₱50","₱1,000"]},{q:"In simple interest formula I = Prt, what does 'r' stand for?", a:"Rate", w:["Real money","Ratio","Remaining"]},{q:"If you borrow money for 6 months, what value for 't' (years) is used?", a:"0.5", w:["6","1","12"]},{q:"Interest calculated on both principal and previous interest:", a:"Compound Interest", w:["Simple","Half","Flat"]},{q:"Person or institution that makes funds available is the:", a:"Lender", w:["Borrower","Debtor","Cashier"]},{q:"In Logic, a simple statement that is either true or false is a:", a:"Proposition", w:["Question","Exclamation","Instruction"]},{q:"Which logical connector uses the word 'AND'?", a:"Conjunction", w:["Disjunction","Negation","Implication"]},{q:"If a statement P is True, what is its Negation (Not P)?", a:"False", w:["True","Maybe","Both"]},{q:"What is the symbol for the logical connector 'OR'?", a:"∨", w:["∧","→","~"]},{q:"The sequence 2, 4, 8, 16 is an example of:", a:"Geometric Sequence", w:["Arithmetic","Fibonacci","Prime"]}],
         "General Science": [{q:"Which subsystem contains all the water on the planet?", a:"Hydrosphere", w:["Atmosphere","Geosphere","Biosphere"]},{q:"What is the thin, outermost layer of the Earth?", a:"Crust", w:["Mantle","Outer Core","Inner Core"]},{q:"Naturally occurring, inorganic solid with crystal structure:", a:"Mineral", w:["Rock","Fossil","Soil"]},{q:"Rock formed from cooling of lava or magma:", a:"Igneous Rock", w:["Sedimentary","Metamorphic","Sandstone"]},{q:"Process of rocks breaking down into smaller pieces:", a:"Weathering", w:["Erosion","Deposition","Compaction"]},{q:"Which planet is known as the 'Blue Planet'?", a:"Earth", w:["Mars","Venus","Neptune"]},{q:"What is the basic unit of life?", a:"Cell", w:["Atom","Tissue","Organ"]},{q:"Organisms that eat plants or other animals are:", a:"Consumers", w:["Producers","Decomposers","Predators"]},{q:"Process plants use to convert sunlight into energy:", a:"Photosynthesis", w:["Respiration","Digestion","Evaporation"]},{q:"Gas produced by plants that humans breathe in:", a:"Oxygen", w:["Carbon Dioxide","Nitrogen","Helium"]}],
-        "Pag-aaral ng Kasaysayan at Lipunang Pilipino": [{q:"Pag-aaral ng pinagmulan at estruktura ng lipunang Pilipino:", a:"Kasaysayan at Sosyolohiya", w:["Matematika","Siyensya","Dayuhang Pag-aaral"]},{q:"Bayani na sumulat ng Noli Me Tangere:", a:"Jose Rizal", w:["Andres Bonifacio","Emilio Aguinaldo","Apolinario Mabini"]},{q:"Layunin ng Pamahalaang Lokal:", a:"Maghatid ng serbisyo sa barangay", w:["Magtayo ng mall","Gumawa ng pera","Gulo"]},{q:"Pagtutulungan nang walang hinihintay na kapalit:", a:"Bayanihan", w:["Mañana Habit","Crab Mentality","Ningas Kugon"]},{q:"Pinakamaliit na yunit ng lipunan:", a:"Pamilya", w:["Paaralan","Simbahan","Pamahalaan"]},{q:"Hunyo 12, 1898:", a:"Proklamasyon ng Kalayaan", w:["Hapon","Magellan","Martial Law"]},{q:"Pagpapahalaga sa tulong na natanggap:", a:"Utang na Loob", w:["Pakikipagkapwa","Hiya","Amor Propio"]},{q:"Sangay na gumagawa ng batas:", a:"Lehislatibo", w:["Ehekutibo","Hudisyal","Militar"]},{q:"Wikang pambansa:", a:"Filipino", w:["Ingles","Kastila","Taglish"]},{q:"Tradisyon na nagbubuklod sa grupo:", a:"Kultural na Pagkakakilanlan", w:["Pera","Damit","Bahay"]}],
-        "Life & Career Skills": [{q:"Managing time effectively:", a:"Time Management", w:["Procrastination","Socializing","Multi-tasking"]},{q:"Ability to adapt to change:", a:"Flexibility", w:["Rigidity","Stubbornness","Fixed Mindset"]},{q:"Working for a common goal:", a:"Collaboration", w:["Competition","Individualism","Leadership"]},{q:"First step in problem-solving:", a:"Identifying the problem", w:["Ignoring","Blaming","Asking"]},{q:"Understanding others' feelings:", a:"Empathy", w:["Sympathy","Apathy","Criticism"]},{q:"Being on time for work or school:", a:"Punctuality", w:["Loudness","Dressing","Finishing"]},{q:"Main purpose of a Resume:", a:"Summarize skills/experience", w:["Hobbies","Social media","ID"]},{q:"SMART - 'A' stands for:", a:"Achievable", w:["Always","Active","Aggressive"]},{q:"The ability to lead and motivate others:", a:"Leadership", w:["Following","Quietness","Laziness"]},{q:"Maintaining a positive attitude at work:", a:"Professionalism", w:["Arrogance","Anger","Sarcasm"]}]
+        "Pag-aaral ng Kasaysayan at Lipunang Pilipino": [{q:"Pag-aaral ng lipunang Pilipino:", a:"Kasaysayan at Sosyolohiya", w:["Matematika","Siyensya","Dayuhang Pag-aaral"]},{q:"Bayani na sumulat ng Noli Me Tangere:", a:"Jose Rizal", w:["Andres Bonifacio","Emilio Aguinaldo","Apolinario Mabini"]},{q:"Layunin ng Pamahalaang Lokal:", a:"Maghatid ng serbisyo sa barangay", w:["Magtayo ng mall","Gumawa ng pera","Gulo"]},{q:"Pagtutulungan nang walang kapalit:", a:"Bayanihan", w:["Mañana Habit","Crab Mentality","Ningas Kugon"]},{q:"Pinakamaliit na yunit ng lipunan:", a:"Pamilya", w:["Paaralan","Simbahan","Pamahalaan"]},{q:"Hunyo 12, 1898:", a:"Proklamasyon ng Kalayaan", w:["Hapon","Magellan","Martial Law"]},{q:"Pagpapahalaga sa tulong:", a:"Utang na Loob", w:["Pakikipagkapwa","Hiya","Amor Propio"]},{q:"Sangay na gumagawa ng batas:", a:"Lehislatibo", w:["Ehekutibo","Hudisyal","Militar"]},{q:"Wikang pambansa:", a:"Filipino", w:["Ingles","Kastila","Taglish"]},{q:"Tradisyon na nagbubuklod:", a:"Kultural na Pagkakakilanlan", w:["Pera","Damit","Bahay"]}],
+        "Life & Career Skills": [{q:"Managing time effectively:", a:"Time Management", w:["Procrastination","Socializing","Multi-tasking"]},{q:"Ability to adapt to change:", a:"Flexibility", w:["Rigidity","Stubbornness","Fixed Mindset"]},{q:"Working for a common goal:", a:"Collaboration", w:["Competition","Individualism","Leadership"]},{q:"First step in problem-solving:", a:"Identifying the problem", w:["Ignoring","Blaming","Asking"]},{q:"Understanding others' feelings:", a:"Empathy", w:["Sympathy","Apathy","Criticism"]},{q:"Being on time:", a:"Punctuality", w:["Loudness","Dressing","Finishing"]},{q:"Main purpose of a Resume:", a:"Summarize skills/experience", w:["Hobbies","Social media","ID"]},{q:"SMART - 'A' stands for:", a:"Achievable", w:["Always","Active","Aggressive"]},{q:"Ability to lead others:", a:"Leadership", w:["Following","Quietness","Laziness"]},{q:"Maintaining positive attitude:", a:"Professionalism", w:["Arrogance","Anger","Sarcasm"]}]
     },
     "STEM Subjects": {
-        "General Physics 1": [{q:"Rate of change of displacement vs time:", a:"Velocity", w:["Speed","Acceleration","Distance"]},{q:"Tendency of object to resist motion change:", a:"Inertia", w:["Momentum","Force","Friction"]},{q:"Product of mass and acceleration (F=ma):", a:"Force", w:["Power","Work","Energy"]},{q:"Energy due to position or height:", a:"Potential Energy", w:["Kinetic","Thermal","Sound"]},{q:"Force opposing relative motion of surfaces:", a:"Friction", w:["Gravity","Tension","Magnetic"]},{q:"Acceleration of free-fall on Earth:", a:"9.8 m/s²", w:["3.0 m/s²","15 m/s²","1.0 m/s²"]},{q:"Standard unit of energy and work:", a:"Joule", w:["Newton","Watt","Pascal"]},{q:"Quantity with magnitude and direction:", a:"Vector", w:["Scalar","Constant","Integer"]},{q:"If net force is zero, object is in:", a:"Equilibrium", w:["Motion","Acceleration","Freefall"]},{q:"An object in motion stays in motion unless acted upon by a:", a:"Net Force", w:["Mass","Speed","Volume"]}],
-        "General Biology": [{q:"Powerhouse of the cell:", a:"Mitochondria", w:["Ribosomes","Lysosomes","Golgi"]},{q:"Jelly-like substance in cell:", a:"Cytoplasm", w:["Nucleus","Cell Wall","Vacuole"]},{q:"Protein synthesis site:", a:"Ribosomes", w:["ER","Nucleolus","Chloroplast"]},{q:"Plant organelle for photosynthesis:", a:"Chloroplast", w:["Vacuole","Mitochondria","Membrane"]},{q:"Gatekeeper of the cell:", a:"Cell Membrane", w:["Cell Wall","Cytoskeleton","Envelope"]},{q:"Eukaryotic cells feature:", a:"Have a nucleus", w:["Larger","Only DNA","Only membrane"]},{q:"Control center containing DNA:", a:"Nucleus", w:["Nucleolus","Rough ER","Smooth ER"]},{q:"Transport requiring energy (ATP):", a:"Active Transport", w:["Passive","Diffusion","Osmosis"]},{q:"Cell division for growth/repair:", a:"Mitosis", w:["Meiosis","Binary Fission","Fertilization"]},{q:"'Suicide Bag' of the cell:", a:"Lysosome", w:["Peroxisome","Vacuole","Golgi"]}],
-        "General Chemistry": [{q:"Smallest particle of an element:", a:"Atom", w:["Molecule","Compound","Proton"]},{q:"Matter with definite shape and volume:", a:"Solid", w:["Liquid","Gas","Plasma"]},{q:"Horizontal rows in Periodic Table:", a:"Periods", w:["Groups","Families","Columns"]},{q:"Chemical symbol for Gold:", a:"Au", w:["Ag","Gd","Go"]},{q:"Negative subatomic particle:", a:"Electron", w:["Proton","Neutron","Nucleolus"]},{q:"Bond where atoms share electrons:", a:"Covalent Bond", w:["Ionic","Metallic","Hydrogen"]},{q:"Solution with pH of 7 is:", a:"Neutral", w:["Acidic","Basic","Bitter"]},{q:"Common name for H2O:", a:"Water", w:["Salt","Methane","Peroxide"]},{q:"Center of the atom:", a:"Nucleus", w:["Shell","Orbit","Valance"]},{q:"Atomic number represents the number of:", a:"Protons", w:["Neutrons","Electrons","Bonds"]}],
-        "Earth & Space Science": [{q:"Origin of the universe theory:", a:"Big Bang Theory", w:["Steady State","Nebular","Pulsating"]},{q:"The 'Red Planet':", a:"Mars", w:["Jupiter","Venus","Saturn"]},{q:"Our galaxy:", a:"Milky Way", w:["Andromeda","Sombrero","Whirlpool"]},{q:"Closest star to Earth:", a:"The Sun", w:["Proxima Centauri","Sirius","Polaris"]},{q:"Force keeping planets in orbit:", a:"Gravity", w:["Friction","Magnetism","Inertia"]},{q:"Layer containing Ozone:", a:"Stratosphere", w:["Troposphere","Mesosphere","Exosphere"]},{q:"Moon between Earth and Sun:", a:"Solar Eclipse", w:["Lunar","Equinox","Solstice"]},{q:"Ice/dust with 'tails':", a:"Comets", w:["Meteors","Asteroids","Satellites"]},{q:"Earth revolution time:", a:"365.25 days", w:["24 hours","30 days","12 hours"]},{q:"Largest planet in our solar system:", a:"Jupiter", w:["Saturn","Neptune","Uranus"]}]
+        "General Physics 1": [{q:"Rate of change of displacement:", a:"Velocity", w:["Speed","Acceleration","Distance"]},{q:"Tendency to resist motion change:", a:"Inertia", w:["Momentum","Force","Friction"]},{q:"Product of mass and acceleration:", a:"Force", w:["Power","Work","Energy"]},{q:"Energy due to position:", a:"Potential Energy", w:["Kinetic","Thermal","Sound"]},{q:"Force opposing motion:", a:"Friction", w:["Gravity","Tension","Magnetic"]},{q:"Acceleration of free-fall:", a:"9.8 m/s²", w:["3.0 m/s²","15 m/s²","1.0 m/s²"]},{q:"Unit of energy:", a:"Joule", w:["Newton","Watt","Pascal"]},{q:"Magnitude and direction:", a:"Vector", w:["Scalar","Constant","Integer"]},{q:"If net force is zero:", a:"Equilibrium", w:["Motion","Acceleration","Freefall"]},{q:"Motion stays in motion unless:", a:"Net Force", w:["Mass","Speed","Volume"]}],
+        "General Biology": [{q:"Powerhouse of the cell:", a:"Mitochondria", w:["Ribosomes","Lysosomes","Golgi"]},{q:"Jelly-like substance:", a:"Cytoplasm", w:["Nucleus","Cell Wall","Vacuole"]},{q:"Protein synthesis site:", a:"Ribosomes", w:["ER","Nucleolus","Chloroplast"]},{q:"Organelle for photosynthesis:", a:"Chloroplast", w:["Vacuole","Mitochondria","Membrane"]},{q:"Gatekeeper of the cell:", a:"Cell Membrane", w:["Cell Wall","Cytoskeleton","Envelope"]},{q:"Eukaryotic cells feature:", a:"Have a nucleus", w:["Larger","Only DNA","Only membrane"]},{q:"Control center containing DNA:", a:"Nucleus", w:["Nucleolus","Rough ER","Smooth ER"]},{q:"Transport requiring ATP:", a:"Active Transport", w:["Passive","Diffusion","Osmosis"]},{q:"Division for growth:", a:"Mitosis", w:["Meiosis","Binary Fission","Fertilization"]},{q:"'Suicide Bag' of the cell:", a:"Lysosome", w:["Peroxisome","Vacuole","Golgi"]}],
+        "General Chemistry": [{q:"Smallest particle of element:", a:"Atom", w:["Molecule","Compound","Proton"]},{q:"Definite shape and volume:", a:"Solid", w:["Liquid","Gas","Plasma"]},{q:"Horizontal rows in Periodic Table:", a:"Periods", w:["Groups","Families","Columns"]},{q:"Symbol for Gold:", a:"Au", w:["Ag","Gd","Go"]},{q:"Negative subatomic particle:", a:"Electron", w:["Proton","Neutron","Nucleolus"]},{q:"Sharing electrons bond:", a:"Covalent Bond", w:["Ionic","Metallic","Hydrogen"]},{q:"pH of 7 is:", a:"Neutral", w:["Acidic","Basic","Bitter"]},{q:"Common name for H2O:", a:"Water", w:["Salt","Methane","Peroxide"]},{q:"Center of the atom:", a:"Nucleus", w:["Shell","Orbit","Valance"]},{q:"Atomic number represents:", a:"Protons", w:["Neutrons","Electrons","Bonds"]}],
+        "Earth & Space Science": [{q:"Origin of universe theory:", a:"Big Bang Theory", w:["Steady State","Nebular","Pulsating"]},{q:"The 'Red Planet':", a:"Mars", w:["Jupiter","Venus","Saturn"]},{q:"Our galaxy:", a:"Milky Way", w:["Andromeda","Sombrero","Whirlpool"]},{q:"Closest star to Earth:", a:"The Sun", w:["Proxima Centauri","Sirius","Polaris"]},{q:"Force keeping orbits:", a:"Gravity", w:["Friction","Magnetism","Inertia"]},{q:"Layer containing Ozone:", a:"Stratosphere", w:["Troposphere","Mesosphere","Exosphere"]},{q:"Moon between Earth and Sun:", a:"Solar Eclipse", w:["Lunar","Equinox","Solstice"]},{q:"Ice/dust with 'tails':", a:"Comets", w:["Meteors","Asteroids","Satellites"]},{q:"Earth revolution time:", a:"365.25 days", w:["24 hours","30 days","12 hours"]},{q:"Largest planet:", a:"Jupiter", w:["Saturn","Neptune","Uranus"]}]
     },
     "ICT & Business": {
-        "Computer Programming": [{q:"Java is known for being:", a:"Platform-independent", w:["Dependent","Low-level","Hardware"]},{q:"Java source extension:", a:".java", w:[".jav",".class",".exe"]},{q:"Correct display output:", a:'System.out.println("Hello");', w:["print","echo","console.log"]},{q:"Symbol to end statement:", a:";", w:[":",",","."]},{q:"New line code:", a:'System.out.println("\\n");', w:["/n","\\t","nl"]},{q:"Output of print('A'); println('B');:", a:"AB", w:["A B","A\\nB","Error"]},{q:"Display Hello World:", a:'System.out.println("Hello World");', w:["print","log","write"]},{q:"5 + 10 result:", a:'15', w:["510","50","Error"]},{q:"1 + 2 + '3' (String Concatenation):", a:"33", w:["6","123","Error"]},{q:"A container for data in programming:", a:"Variable", w:["Function","Loop","Class"]}],
-        "Bakery Operations": [{q:"Leavening agent for bread:", a:"Yeast", w:["Baking powder","Salt","Sugar"]},{q:"Bread internal temp:", a:"200–210°F", w:["180","190","220"]},{q:"Tool for flour accuracy:", a:"Kitchen scale", w:["Cup","Spoon","Rolling pin"]},{q:"Function of sugar in baking:", a:"Sweetness and browning", w:["Leavening","Gluten","Moisture"]},{q:"Strengthens structure of bread:", a:"Flour", w:["Fat","Eggs","Water"]},{q:"Storage temp (Room):", a:"20–25°C", w:["0-5","30-35","50-55"]},{q:"Accurate measurement result:", a:"Consistent quality", w:["Faster rise","Less sugar","Sweeter"]},{q:"Ideal proofing environment:", a:"Warm and humid", w:["Cold/dry","Hot/dry","Ventilated"]},{q:"Process of making dough smooth and elastic:", a:"Kneading", w:["Whisking","Folding","Sifting"]},{q:"Type of flour with highest protein:", a:"Bread Flour", w:["Cake Flour","All-purpose","Pastry"]}],
-        "Contemporary Literature": [{q:"Genre written on phones:", a:"Text Tula", w:["Blog","Flash Fiction","Hyper-poetry"]},{q:"Character of Flash Fiction:", a:"Extremely short story", w:["No ending","Long novel","Verse"]},{q:"Combines book/video/web:", a:"Digi-Fiction", w:["Manga","Doodle Fiction","E-book"]},{q:"Story via comic panels:", a:"Graphic Novel", w:["Text-talk","Hyper-poetry","Speculative"]},{q:"Japanese comic style:", a:"Manga", w:["Manhwa","Graphic Novel","Digi-fiction"]},{q:"'Blog' full name:", a:"Web Log", w:["Book","Best","Binary"]},{q:"Future/magical worlds:", a:"Speculative Fiction", w:["Non-Fiction","Biography","Memoir"]},{q:"Text-Talk Novel style:", a:"Chat logs", w:["Letters","Paragraphs","Sketches"]},{q:"Creative Non-Fiction:", a:"True story/literary tech", w:["Fake story","Poem","Textbook"]},{q:"Poetry meant to be performed:", a:"Spoken Word", w:["Haiku","Sonnet","Text Tula"]}],
-        "Politics & Governance": [{q:"Supreme law of PH:", a:"1987 Constitution", w:["Civil Code","Magna Carta","Bill of Rights"]},{q:"Enforces laws:", a:"Executive Branch", w:["Legislative","Judicial","Military"]},{q:"President's term in Philippines:", a:"6 years", w:["4","8","10"]},{q:"Congress composition:", a:"Senate and House", w:["Cabinet","Supreme Court","LGU"]},{q:"Minimum voting age:", a:"18 years old", w:["15","21","16"]},{q:"Reject a bill power:", a:"Veto", w:["Pardon","Impeachment","Appointment"]},{q:"Commander-in-Chief:", a:"The President", w:["Defense Sec","Chief","Senate Pres"]},{q:"Judicial role:", a:"Interpret laws", w:["Taxes","War","Treaties"]},{q:"Smallest political unit:", a:"Barangay", w:["Municipality","Province","City"]},{q:"Election commission:", a:"COMELEC", w:["Civil Service","COA","DOJ"]}],
-        "Basic Accounting": [{q:"Accounting Equation:", a:"Assets = Liabilities + Equity", w:["A=L-E","R=E","A+L=E"]},{q:"Resources owned by a business:", a:"Assets", w:["Liabilities","Expenses","Revenues"]},{q:"Financial position report:", a:"Balance Sheet", w:["Income Statement","Cash Flow","Journal"]},{q:"Left side of an account:", a:"Debit", w:["Credit","Balance","Equity"]},{q:"Debts or obligations:", a:"Liabilities", w:["Assets","Capital","Income"]},{q:"Chronological recording of transactions:", a:"Journalizing", w:["Posting","Summarizing","Auditing"]},{q:"Providing services increases:", a:"Revenue", w:["Expense","Liability","Asset"]},{q:"Original entry book:", a:"General Journal", w:["Ledger","Worksheet","Trial"]},{q:"Goal of accounting:", a:"Decision-making info", w:["Hide money","Count staff","Ads"]},{q:"Withdrawal of cash by owner decreases:", a:"Equity", w:["Liabilities","Revenue","Debt"]}],
-        "Organization & Management": [{q:"Four main functions of management:", a:"Planning, Organizing, Leading, Controlling", w:["Buy/Sell","Type/File","Hire/Fire"]},{q:"Setting goals and ways to achieve them:", a:"Planning", w:["Controlling","Staffing","Budgeting"]},{q:"SWOT - 'T' stands for:", a:"Threats", w:["Time","Team","Tasks"]},{q:"Decision-making (no consultation):", a:"Autocratic", w:["Democratic","Laissez-faire","Participative"]},{q:"Top-level role:", a:"Long-term vision", w:["Daily supervision","Hiring","Repairs"]},{q:"Monitoring performance:", a:"Controlling", w:["Planning","Brainstorming","Marketing"]},{q:"Recruiting and hiring employees:", a:"Staffing", w:["Leading","Accounting","Organizing"]},{q:"'Hands-off' leadership style:", a:"Laissez-faire", w:["Dictatorial","Democratic","Bureaucratic"]},{q:"Company purpose summary:", a:"Mission Statement", w:["Salary list","Office map","Secret code"]},{q:"SWOT - 'W' stands for:", a:"Weaknesses", w:["Work","Wealth","Win"]}]
+        "Computer Programming": [{q:"Java is known for being:", a:"Platform-independent", w:["Dependent","Low-level","Hardware"]},{q:"Java source extension:", a:".java", w:[".jav",".class",".exe"]},{q:"Correct display output:", a:'System.out.println("Hello");', w:["print","echo","console.log"]},{q:"Symbol to end statement:", a:";", w:[":",",","."]},{q:"New line code:", a:'System.out.println("\\n");', w:["/n","\\t","nl"]},{q:"Output of print('A'); println('B');:", a:"AB", w:["A B","A\\nB","Error"]},{q:"Display Hello World:", a:'System.out.println("Hello World");', w:["print","log","write"]},{q:"5 + 10 result:", a:'15', w:["510","50","Error"]},{q:"1 + 2 + '3' result:", a:"33", w:["6","123","Error"]},{q:"Data container in programming:", a:"Variable", w:["Function","Loop","Class"]}],
+        "Bakery Operations": [{q:"Leavening agent for bread:", a:"Yeast", w:["Baking powder","Salt","Sugar"]},{q:"Bread internal temp:", a:"200–210°F", w:["180","190","220"]},{q:"Tool for flour accuracy:", a:"Kitchen scale", w:["Cup","Spoon","Rolling pin"]},{q:"Function of sugar:", a:"Sweetness and browning", w:["Leavening","Gluten","Moisture"]},{q:"Strengthens bread structure:", a:"Flour", w:["Fat","Eggs","Water"]},{q:"Storage temp (Room):", a:"20–25°C", w:["0-5","30-35","50-55"]},{q:"Accurate measurement:", a:"Consistent quality", w:["Faster rise","Less sugar","Sweeter"]},{q:"Ideal proofing environment:", a:"Warm and humid", w:["Cold/dry","Hot/dry","Ventilated"]},{q:"Making dough smooth/elastic:", a:"Kneading", w:["Whisking","Folding","Sifting"]},{q:"Highest protein flour:", a:"Bread Flour", w:["Cake Flour","All-purpose","Pastry"]}],
+        "Contemporary Literature": [{q:"Genre written on phones:", a:"Text Tula", w:["Blog","Flash Fiction","Hyper-poetry"]},{q:"Character of Flash Fiction:", a:"Extremely short story", w:["No ending","Long novel","Verse"]},{q:"Combines book/video/web:", a:"Digi-Fiction", w:["Manga","Doodle Fiction","E-book"]},{q:"Story via comic panels:", a:"Graphic Novel", w:["Text-talk","Hyper-poetry","Speculative"]},{q:"Japanese comic style:", a:"Manga", w:["Manhwa","Graphic Novel","Digi-fiction"]},{q:"'Blog' full name:", a:"Web Log", w:["Book","Best","Binary"]},{q:"Future/magical worlds:", a:"Speculative Fiction", w:["Non-Fiction","Biography","Memoir"]},{q:"Text-Talk Novel style:", a:"Chat logs", w:["Letters","Paragraphs","Sketches"]},{q:"Creative Non-Fiction:", a:"True story technique", w:["Fake story","Poem","Textbook"]},{q:"Performance poetry:", a:"Spoken Word", w:["Haiku","Sonnet","Text Tula"]}],
+        "Politics & Governance": [{q:"Supreme law of PH:", a:"1987 Constitution", w:["Civil Code","Magna Carta","Bill of Rights"]},{q:"Enforces laws:", a:"Executive Branch", w:["Legislative","Judicial","Military"]},{q:"President's term:", a:"6 years", w:["4","8","10"]},{q:"Congress composition:", a:"Senate and House", w:["Cabinet","Supreme Court","LGU"]},{q:"Minimum voting age:", a:"18 years old", w:["15","21","16"]},{q:"Reject a bill power:", a:"Veto", w:["Pardon","Impeachment","Appointment"]},{q:"Commander-in-Chief:", a:"The President", w:["Defense Sec","Chief","Senate Pres"]},{q:"Judicial role:", a:"Interpret laws", w:["Taxes","War","Treaties"]},{q:"Smallest political unit:", a:"Barangay", w:["Municipality","Province","City"]},{q:"Election commission:", a:"COMELEC", w:["Civil Service","COA","DOJ"]}],
+        "Basic Accounting": [{q:"Accounting Equation:", a:"Assets = Liabilities + Equity", w:["A=L-E","R=E","A+L=E"]},{q:"Resources owned:", a:"Assets", w:["Liabilities","Expenses","Revenues"]},{q:"Financial position report:", a:"Balance Sheet", w:["Income Statement","Cash Flow","Journal"]},{q:"Left side of an account:", a:"Debit", w:["Credit","Balance","Equity"]},{q:"Debts or obligations:", a:"Liabilities", w:["Assets","Capital","Income"]},{q:"Chronological recording:", a:"Journalizing", w:["Posting","Summarizing","Auditing"]},{q:"Providing services increases:", a:"Revenue", w:["Expense","Liability","Asset"]},{q:"Original entry book:", a:"General Journal", w:["Ledger","Worksheet","Trial"]},{q:"Goal of accounting:", a:"Decision-making info", w:["Hide money","Count staff","Ads"]},{q:"Owner withdrawal decreases:", a:"Equity", w:["Liabilities","Revenue","Debt"]}],
+        "Organization & Management": [{q:"Four main functions:", a:"Planning, Organizing, Leading, Controlling", w:["Buy/Sell","Type/File","Hire/Fire"]},{q:"Setting goals:", a:"Planning", w:["Controlling","Staffing","Budgeting"]},{q:"SWOT - 'T' stands for:", a:"Threats", w:["Time","Team","Tasks"]},{q:"Decision-making (no consultation):", a:"Autocratic", w:["Democratic","Laissez-faire","Participative"]},{q:"Top-level role:", a:"Long-term vision", w:["Daily supervision","Hiring","Repairs"]},{q:"Monitoring performance:", a:"Controlling", w:["Planning","Brainstorming","Marketing"]},{q:"Recruiting employees:", a:"Staffing", w:["Leading","Accounting","Organizing"]},{q:"'Hands-off' style:", a:"Laissez-faire", w:["Dictatorial","Democratic","Bureaucratic"]},{q:"Company purpose summary:", a:"Mission Statement", w:["Salary list","Office map","Secret code"]},{q:"SWOT - 'W' stands for:", a:"Weaknesses", w:["Work","Wealth","Win"]}]
     }
 };
 
-let db = JSON.parse(localStorage.getItem('quiriosity_master_db')) || FULL_DB;
+let db = JSON.parse(localStorage.getItem('q_db')) || FULL_DB;
 let peer, conn, connections = [], curSub = '', curCat = '', qIdx = 0, score = 0, activeQs = [];
-let manualGame = { name: 'PIZZA PARTY', theme: '' };
-let editMode = 'mc';
-let editingIndex = -1;
+let manualGame = { name: 'Pizza Party', theme: '' };
+let editMode = 'mc', editingIndex = -1;
 
 function nav(id) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -206,109 +204,60 @@ function nav(id) {
     if(id === 'view-dash') renderFolders();
 }
 
-function save() { localStorage.setItem('quiriosity_master_db', JSON.stringify(db)); }
-
-function resetToDefault() {
-    if(confirm("Restore default database? This deletes custom folders!")) { 
-        db = JSON.parse(JSON.stringify(FULL_DB)); save(); renderFolders(); 
-    }
-}
+function save() { localStorage.setItem('q_db', JSON.stringify(db)); }
+function resetToDefault() { if(confirm("Reset entire database?")) { db = JSON.parse(JSON.stringify(FULL_DB)); save(); renderFolders(); }}
 
 function addFolder() {
     const cat = document.getElementById('new-cat').value.trim();
     const sub = document.getElementById('new-sub').value.trim();
-    if(!cat || !sub) return alert("Fill Subject and Topic!");
-    if(!db[cat]) db[cat] = {};
-    db[cat][sub] = []; save(); renderFolders();
-    document.getElementById('new-sub').value = '';
+    if(cat && sub) { if(!db[cat]) db[cat] = {}; db[cat][sub] = []; save(); renderFolders(); }
 }
 
 function renderFolders() {
     const list = document.getElementById('folder-list'); list.innerHTML = '';
     Object.keys(db).forEach(cat => {
         Object.keys(db[cat]).forEach(sub => {
-            list.innerHTML += `<div class="list-item">
-                <span onclick="openEditor('${cat}','${sub}')" style="cursor:pointer; flex:1;">
-                    <strong>${sub}</strong><br><small style="color:var(--yellow)">${cat}</small>
-                </span>
-                <button class="btn-del" onclick="delSub('${cat}','${sub}')">✕</button>
-            </div>`;
+            list.innerHTML += `<div class="list-item"><span onclick="openEditor('${cat}','${sub}')" style="flex:1; cursor:pointer"><strong>${sub}</strong><br><small>${cat}</small></span><button class="btn-del" onclick="delSub('${cat}','${sub}')">✕</button></div>`;
         });
     });
 }
 
-function delSub(cat, sub) { if(confirm(`Delete folder: ${sub}?`)) { delete db[cat][sub]; save(); renderFolders(); }}
+function delSub(c, s) { if(confirm(`Delete ${s}?`)) { delete db[c][s]; save(); renderFolders(); }}
 
 function openEditor(cat, sub) {
-    curCat = cat; curSub = sub;
-    document.getElementById('edit-title').innerText = sub;
+    curCat = cat; curSub = sub; document.getElementById('edit-title').innerText = sub;
     clearEditor(); refreshQList(); nav('view-edit');
 }
 
-function setEditMode(mode) {
-    editMode = mode;
-    document.getElementById('m-mc').className = mode === 'mc' ? 'active-mode' : '';
-    document.getElementById('m-id').className = mode === 'id' ? 'active-mode' : '';
-    document.getElementById('add-w').style.display = mode === 'mc' ? 'block' : 'none';
+function setEditMode(m) { editMode = m; document.getElementById('m-mc').className = m==='mc'?'active-mode':''; document.getElementById('m-id').className = m==='id'?'active-mode':''; document.getElementById('add-w').style.display = m==='mc'?'block':'none'; }
+
+function editQ(i) {
+    editingIndex = i; const item = db[curCat][curSub][i];
+    document.getElementById('add-q').value = item.q; document.getElementById('add-a').value = item.a;
+    document.getElementById('add-w').value = item.w ? item.w.join(',') : '';
+    setEditMode(item.type || 'mc'); document.getElementById('btn-save-q').innerText = "✓ UPDATE QUESTION";
 }
 
 function saveQuestion() {
     const q = document.getElementById('add-q').value, a = document.getElementById('add-a').value, w = document.getElementById('add-w').value;
-    if(!q || !a) return alert("Fill Q and A!");
+    if(!q || !a) return;
     const newQ = { q, a, type: editMode, w: editMode === 'mc' ? w.split(',').map(s=>s.trim()) : [] };
-    if(editingIndex > -1) db[curCat][curSub][editingIndex] = newQ;
-    else db[curCat][curSub].push(newQ);
+    if(editingIndex > -1) db[curCat][curSub][editingIndex] = newQ; else db[curCat][curSub].push(newQ);
     save(); clearEditor(); refreshQList();
 }
 
-function editQ(i) {
-    editingIndex = i;
-    const item = db[curCat][curSub][i];
-    document.getElementById('add-q').value = item.q;
-    document.getElementById('add-a').value = item.a;
-    document.getElementById('add-w').value = item.w ? item.w.join(',') : '';
-    setEditMode(item.type || 'mc');
-    document.getElementById('btn-save-q').innerText = "✓ UPDATE QUESTION";
-}
-
-function clearEditor() {
-    document.getElementById('add-q').value = ''; document.getElementById('add-a').value = ''; document.getElementById('add-w').value = '';
-    document.getElementById('btn-save-q').innerText = "+ SAVE QUESTION";
-    editingIndex = -1;
-}
-
-function refreshQList() {
-    const ql = document.getElementById('q-list'); ql.innerHTML = '';
-    db[curCat][curSub].forEach((q, i) => { 
-        ql.innerHTML += `<div class="list-item" style="border-left-color:${q.type==='id'?'var(--orange)':'var(--yellow)'}">
-            <span onclick="editQ(${i})" style="cursor:pointer; flex:1;">${i+1}. ${q.q}</span>
-            <button class="btn-del" onclick="delQ(${i})">✕</button>
-        </div>`; 
-    });
-}
-
+function clearEditor() { document.getElementById('add-q').value = ''; document.getElementById('add-a').value = ''; document.getElementById('add-w').value = ''; editingIndex = -1; document.getElementById('btn-save-q').innerText = "+ SAVE QUESTION"; }
+function refreshQList() { const ql = document.getElementById('q-list'); ql.innerHTML = ''; db[curCat][curSub].forEach((q, i) => { ql.innerHTML += `<div class="list-item"><span onclick="editQ(${i})" style="flex:1; cursor:pointer">${i+1}. ${q.q}</span><button class="btn-del" onclick="delQ(${i})">✕</button></div>`; }); }
 function delQ(i) { db[curCat][curSub].splice(i, 1); save(); refreshQList(); }
 
-function setManualGame(name, theme) {
-    manualGame = { name, theme };
-    document.querySelectorAll('.btn-game').forEach(b => b.classList.remove('selected'));
-    document.getElementById(name.includes('Solar')?'g-solar':name.includes('Power')?'g-power':'g-pizza').classList.add('selected');
-}
+function setManualGame(n, t) { manualGame = { name: n, theme: t }; document.querySelectorAll('.btn-game').forEach(b => b.classList.remove('selected')); document.getElementById(n.includes('Solar')?'g-solar':n.includes('Power')?'g-power':'g-pizza').classList.add('selected'); }
 
 function launchGame() {
     const code = document.getElementById('host-code').value;
-    if(!code || !db[curCat] || !db[curCat][curSub] || db[curCat][curSub].length === 0) return alert("Enter Code & ensure folder has questions!");
+    if(!code) return alert("Enter Code!");
     peer = new Peer('q-' + code);
     peer.on('open', () => { nav('view-lobby'); document.getElementById('room-display').innerText = "ROOM: " + code; });
-    peer.on('connection', c => {
-        connections.push(c);
-        c.on('data', data => {
-            if(data.type === 'result') {
-                const row = `<tr><td>${data.name}</td><td><strong>${data.score}/${data.total}</strong></td></tr>`;
-                document.getElementById('live-results').innerHTML += row;
-            }
-        });
-    });
+    peer.on('connection', c => { connections.push(c); c.on('data', d => { if(d.type==='res') document.getElementById('live-results').innerHTML += `<tr><td>${d.name}</td><td>${d.score}/${d.total}</td></tr>`; }); });
 }
 
 function joinGame() {
@@ -316,54 +265,51 @@ function joinGame() {
     peer = new Peer();
     peer.on('open', () => {
         conn = peer.connect('q-' + code);
-        conn.on('open', () => { nav('view-arena'); document.getElementById('q-text').innerText = "WAITING FOR TEACHER TO START..."; });
-        conn.on('data', data => {
-            if(data.type === 'start') {
-                activeQs = data.qs;
-                document.getElementById('game-badge').innerText = data.game.name;
-                document.getElementById('main-shell').className = "app-shell " + data.game.theme;
-                startQuiz(name);
-            }
-        });
+        conn.on('open', () => { nav('view-arena'); });
+        conn.on('data', d => { if(d.type==='start') { activeQs = d.qs; manualGame = d.game; startQuiz(name); }});
     });
 }
 
 function signalStart() { connections.forEach(c => c.send({type:'start', qs: db[curCat][curSub], game: manualGame})); }
 
-function startQuiz(userName) { qIdx = 0; score = 0; showQ(userName); }
+function startQuiz(n) {
+    qIdx = 0; score = 0; document.getElementById('main-shell').className = "app-shell " + manualGame.theme;
+    const canvas = document.getElementById('game-canvas'); canvas.innerHTML = '';
+    if(manualGame.name === 'Solar Forge') canvas.innerHTML = `<div class="sun" id="v-sun"></div>`;
+    if(manualGame.name === 'Power Cell') canvas.innerHTML = `<div class="battery"><div class="bat-fill" id="v-bat"></div></div>`;
+    if(manualGame.name === 'Pizza Party') canvas.innerHTML = `<div class="pizza-crust" id="v-pizza"></div>`;
+    showQ(n);
+}
 
-function showQ(userName) {
-    if(qIdx >= activeQs.length) {
-        conn.send({type: 'result', name: userName, score: score, total: activeQs.length});
-        nav('view-result');
-        document.getElementById('final-score').innerText = `${score}/${activeQs.length}`;
-        return;
-    }
-    const q = activeQs[qIdx];
-    document.getElementById('q-text').innerText = q.q;
+function showQ(n) {
+    if(qIdx >= activeQs.length) { conn.send({type:'res', name:n, score:score, total:activeQs.length}); nav('view-result'); document.getElementById('final-score').innerText = `${score}/${activeQs.length}`; return; }
+    const q = activeQs[qIdx]; document.getElementById('q-text').innerText = q.q;
     document.getElementById('p-bar').style.width = (qIdx/activeQs.length)*100 + "%";
-    const grid = document.getElementById('opt-grid');
-    const idBox = document.getElementById('id-input-box');
+    const grid = document.getElementById('opt-grid'), idBox = document.getElementById('id-input-box');
     grid.innerHTML = ''; idBox.style.display = 'none';
-    if(q.type === 'id') {
-        idBox.style.display = 'flex';
-        document.getElementById('typed-ans').value = '';
-    } else {
-        const opts = [q.a, ...q.w].sort(() => Math.random() - 0.5);
-        opts.forEach(o => {
-            const btn = document.createElement('button');
-            btn.className = 'opt-btn'; btn.innerText = o;
-            btn.onclick = () => { if(o === q.a) score++; qIdx++; showQ(userName); };
-            grid.appendChild(btn);
+    if(q.type === 'id') { idBox.style.display = 'flex'; document.getElementById('typed-ans').value = ''; }
+    else {
+        [q.a, ...q.w].sort(()=>Math.random()-0.5).forEach(o => {
+            const b = document.createElement('button'); b.className = 'opt-btn'; b.innerText = o;
+            b.onclick = () => { if(o === q.a) { score++; updateAnim(); } qIdx++; showQ(n); };
+            grid.appendChild(b);
         });
     }
 }
 
 function submitIdentification() {
-    const val = document.getElementById('typed-ans').value.trim().toLowerCase();
-    const correct = activeQs[qIdx].a.toLowerCase();
-    if(val === correct) score++;
+    if(document.getElementById('typed-ans').value.trim().toLowerCase() === activeQs[qIdx].a.toLowerCase()) { score++; updateAnim(); }
     qIdx++; showQ(document.getElementById('stu-name').value || "Guest");
+}
+
+function updateAnim() {
+    if(manualGame.name === 'Solar Forge') document.getElementById('v-sun').style.transform = `scale(${1 + (score * 0.2)})`;
+    if(manualGame.name === 'Power Cell') document.getElementById('v-bat').style.width = (score / activeQs.length * 100) + "%";
+    if(manualGame.name === 'Pizza Party') {
+        const t = document.createElement('div'); t.className = 'topping';
+        t.style.left = Math.random()*70+'px'; t.style.top = Math.random()*70+'px';
+        document.getElementById('v-pizza').appendChild(t);
+    }
 }
 </script>
 </body>
