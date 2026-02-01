@@ -140,8 +140,8 @@
             <table style="width:100%; border-collapse: collapse;">
                 <thead>
                     <tr style="border-bottom: 2px solid #333; color: var(--yellow);">
-                        <th style="text-align:left; padding-bottom:10px;">STUDENT</th>
-                        <th style="text-align:right; padding-bottom:10px;">STATUS</th>
+                        <th style="text-align:left; padding-bottom:10px;">STUDENT LOGIN</th>
+                        <th style="text-align:right; padding-bottom:10px;">TEACHER DASHBOARD</th>
                     </tr>
                 </thead>
                 <tbody id="live-results"></tbody>
@@ -398,9 +398,9 @@ function showQ() {
 function handleAnswer(correct) {
     const canvas = document.getElementById('game-canvas');
     if(correct) {
-        score++;
+        score++; // Gain point
     } else {
-        score = Math.max(0, score - 1); 
+        // No minus in whole score
         canvas.classList.add('shake');
         setTimeout(() => canvas.classList.remove('shake'), 500);
     }
@@ -430,6 +430,7 @@ function updateVisual() {
         const items = ['🍄','🍅','🥓','🧀','🥬','🌶️','🍍','🧅','🍗','🍤','🥩'];
         const currentCount = dough.querySelectorAll('.topping').length;
 
+        // Visual now strictly represents the 'score' (correct answers)
         if (score > currentCount) {
             const t = document.createElement('div');
             t.className = 'topping';
@@ -443,10 +444,6 @@ function updateVisual() {
             t.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
             dough.appendChild(t);
         } 
-        else if (score < currentCount) {
-            const last = dough.querySelector('.topping:last-child');
-            if(last) last.remove();
-        }
     } 
     else if(manualGame.name === 'Power') {
         canvas.innerHTML = '';
