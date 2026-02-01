@@ -98,6 +98,7 @@
                         <button class="btn-yellow" onclick="addFolder()">CREATE FOLDER</button>
                     </div>
                     <button class="btn-ghost" onclick="nav('view-home')">BACK TO HOME</button>
+                    <button class="btn-red" style="margin-top:10px; font-size:0.7rem;" onclick="clearAllData()">WIPE ALL CUSTOM DATA</button>
                 </div>
             </div>
             <div class="main-content">
@@ -147,6 +148,7 @@
             </table>
         </div>
         <button class="btn-red" style="margin-top:10px;" onclick="signalStart()">START SESSION</button>
+        <button class="btn-ghost" style="margin-top:10px;" onclick="nav('view-edit')">BACK TO EDITOR</button>
     </div>
 
     <div id="view-wait" class="view">
@@ -272,6 +274,14 @@ function saveQuestion() {
         db[curCat][curSub].push({q, a, w: w ? w.split(',').map(x => x.trim()) : [""]});
         save(); refreshQList();
         document.getElementById('add-q').value = ''; document.getElementById('add-a').value = ''; document.getElementById('add-w').value = '';
+    }
+}
+
+function clearAllData() {
+    if(confirm("This will permanently delete ALL custom folders and questions. Continue?")) {
+        db = JSON.parse(JSON.stringify(FULL_DB));
+        save();
+        renderFolders();
     }
 }
 
