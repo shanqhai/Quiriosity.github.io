@@ -24,11 +24,34 @@
         .scroll-area::-webkit-scrollbar { width: 6px; }
         .scroll-area::-webkit-scrollbar-thumb { background: var(--yellow); border-radius: 10px; }
         
-        /* IMPROVED GAME CANVAS */
         #game-canvas { height: 180px; background: #000; border-radius: 20px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; font-size: 4rem; border: 3px dashed #333; position: relative; overflow: hidden; transition: 0.3s; }
         .shake { animation: shake 0.5s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
         
+        /* PIZZA SYSTEM */
+        .pizza-dough {
+            width: 140px;
+            height: 140px;
+            background: #f1c40f; 
+            border: 6px solid #d35400;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: inset 0 0 15px #e67e22;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .topping {
+            position: absolute;
+            font-size: 1.5rem;
+            user-select: none;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
         .sun-body { transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .pulse { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { filter: drop-shadow(0 0 10px var(--orange)); } 50% { filter: drop-shadow(0 0 30px var(--yellow)); } 100% { filter: drop-shadow(0 0 10px var(--orange)); } }
@@ -367,7 +390,7 @@ function handleAnswer(correct) {
     if(correct) {
         score++;
     } else {
-        score = Math.max(0, score - 1); // Setback: lose 1 point/level
+        score = Math.max(0, score - 1); 
         canvas.classList.add('shake');
         setTimeout(() => canvas.classList.remove('shake'), 500);
     }
@@ -384,18 +407,39 @@ function submitIdent() {
 
 function updateVisual() {
     const canvas = document.getElementById('game-canvas');
-    canvas.innerHTML = ''; // Clear canvas
     
     if(manualGame.name === 'Pizza') {
-        const toppings = ['🍕','🍄','🍅','🥓','🧀','🥬','🌶️','🍍','🧅','🍗'];
-        let currentToppings = "🍕";
-        for(let i=1; i <= score; i++) {
-            currentToppings += toppings[i % toppings.length];
+        let dough = canvas.querySelector('.pizza-dough');
+        if(!dough) {
+            canvas.innerHTML = ''; 
+            dough = document.createElement('div');
+            dough.className = 'pizza-dough';
+            canvas.appendChild(dough);
         }
-        canvas.innerText = currentToppings;
-        canvas.style.fontSize = Math.max(1.5, 4 - (score * 0.2)) + "rem";
+
+        const items = ['🍄','🍅','🥓','🧀','🥬','🌶️','🍍','🧅','🍗','🍤','🥩'];
+        const currentCount = dough.querySelectorAll('.topping').length;
+
+        if (score > currentCount) {
+            const t = document.createElement('div');
+            t.className = 'topping';
+            t.innerText = items[score % items.length];
+            const angle = Math.random() * Math.PI * 2;
+            const dist = Math.random() * 42; 
+            const x = 50 + dist * Math.cos(angle);
+            const y = 50 + dist * Math.sin(angle);
+            t.style.left = x + '%';
+            t.style.top = y + '%';
+            t.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
+            dough.appendChild(t);
+        } 
+        else if (score < currentCount) {
+            const last = dough.querySelector('.topping:last-child');
+            if(last) last.remove();
+        }
     } 
     else if(manualGame.name === 'Power') {
+        canvas.innerHTML = '';
         const fill = document.createElement('div');
         fill.className = 'battery-fill';
         const pct = Math.min(100, (score / activeQs.length) * 100);
@@ -406,11 +450,11 @@ function updateVisual() {
         canvas.appendChild(icon);
     } 
     else if(manualGame.name === 'Solar') {
+        canvas.innerHTML = '';
         const sun = document.createElement('div');
         sun.className = 'sun-body pulse';
         sun.innerText = '☀️';
-        const size = 1 + (score * 0.2);
-        sun.style.transform = `scale(${size})`;
+        sun.style.transform = `scale(${1 + (score * 0.2)})`;
         canvas.appendChild(sun);
     }
 }
