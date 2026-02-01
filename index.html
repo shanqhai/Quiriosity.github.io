@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiriosity | Responsive Fix</title>
+    <title>Quiriosity</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;700&display=swap');
@@ -14,8 +14,6 @@
         }
 
         * { box-sizing: border-box; }
-
-        /* FIX 1: Use 100dvh to account for mobile browser bars */
         body { 
             background: var(--bg); color: var(--white); 
             font-family: 'Outfit', sans-serif; margin: 0; 
@@ -23,61 +21,52 @@
             height: 100dvh; width: 100vw; overflow: hidden; 
         }
         
-        /* FIX 2: App Shell now fills exactly 100% of the visible screen */
         .app-shell { 
             background: var(--card); width: 100%; height: 100%; 
             border: 4px solid var(--red); display: flex; flex-direction: column; 
-            position: relative; overflow: hidden; 
+            position: relative; overflow: hidden; transition: 0.3s;
         }
+
+        /* Themes */
+        .theme-solar { border-color: var(--orange) !important; --red: var(--orange); }
+        .theme-power { border-color: var(--green) !important; --red: var(--green); }
 
         .header { background: var(--red); padding: 10px; text-align: center; border-bottom: 4px solid var(--yellow); flex-shrink: 0; }
         .logo { font-family: 'Bungee'; font-size: 1.5rem; color: var(--yellow); text-shadow: 2px 2px 0px #000; margin: 0; }
         
-        /* FIX 3: View takes up all available space between header and footer */
-        .view { display: none; flex: 1; padding: 15px; overflow: hidden; flex-direction: column; width: 100%; max-width: 900px; margin: 0 auto; }
+        .view { display: none; flex: 1; padding: 15px; overflow: hidden; flex-direction: column; width: 100%; max-width: 1200px; margin: 0 auto; }
         .active { display: flex; }
-        
-        /* FIX 4: Content Body is the ONLY part that scrolls */
-        .content-body { 
-            flex: 1; 
-            overflow-y: auto; 
-            overflow-x: hidden;
-            padding: 10px;
-            -webkit-overflow-scrolling: touch; /* Smooth scroll for tablets */
+
+        /* Split Screen Layout for Tablet */
+        .split-layout { display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
+        @media (min-width: 768px) {
+            .split-layout { flex-direction: row; }
+            .side-editor { width: 350px; flex-shrink: 0; border-right: 1px solid #333; padding-right: 15px; }
+            .main-list { flex: 1; }
         }
-        
-        /* Scrollbar styling */
-        .content-body::-webkit-scrollbar { width: 8px; }
+
+        .content-body { flex: 1; overflow-y: auto; padding-right: 5px; -webkit-overflow-scrolling: touch; }
+        .content-body::-webkit-scrollbar { width: 6px; }
         .content-body::-webkit-scrollbar-thumb { background: var(--yellow); border-radius: 10px; }
 
-        .view-footer { flex-shrink: 0; padding-top: 10px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 8px; }
-        
-        /* Editor Box - making it slightly more compact for tablet screens */
-        .editor-box { background: #111; padding: 12px; border-radius: 15px; border: 1px solid #444; margin-bottom: 10px; flex-shrink: 0; }
-
-        /* UI Elements */
-        button { font-family: 'Bungee'; border: none; padding: 12px; border-radius: 12px; font-size: 0.9rem; cursor: pointer; transition: 0.1s; width: 100%; }
-        button:active { transform: scale(0.98); }
+        .editor-box { background: #111; padding: 12px; border-radius: 15px; border: 1px solid #444; margin-bottom: 10px; }
+        button { font-family: 'Bungee'; border: none; padding: 12px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; transition: 0.1s; width: 100%; }
         .btn-yellow { background: var(--yellow); color: #000; }
         .btn-red { background: var(--red); color: #fff; }
         .btn-ghost { background: transparent; border: 2px solid var(--yellow); color: var(--yellow); }
-        .btn-del { width: auto; background: transparent; color: var(--red); font-size: 1.5rem; padding: 0 10px; }
+        .btn-del { width: auto; background: transparent; color: var(--red); font-size: 1.2rem; padding: 0 10px; }
 
-        input { padding: 12px; background: #000; border: 2px solid #333; color: white; border-radius: 10px; width: 100%; margin-bottom: 8px; font-size: 1rem; }
+        input { padding: 12px; background: #000; border: 2px solid #333; color: white; border-radius: 10px; width: 100%; margin-bottom: 8px; }
         .list-item { background: #222; padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--yellow); margin-bottom: 8px; }
         
-        .progress-track { background: #333; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 10px; flex-shrink: 0; }
-        .p-fill { height: 100%; background: var(--yellow); width: 0%; transition: 0.4s; }
-        
-        .opt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-        .opt-btn { background: #333; color: white; border: 2px solid #444; padding: 15px; text-align: left; border-radius: 12px; }
-
         .mode-toggle { display: flex; gap: 5px; background: #000; padding: 5px; border-radius: 10px; margin-bottom: 8px; }
-        .mode-toggle div { flex: 1; text-align: center; font-size: 0.7rem; padding: 8px; cursor: pointer; border-radius: 6px; opacity: 0.5; font-family: 'Bungee'; }
+        .mode-toggle div { flex: 1; text-align: center; font-size: 0.6rem; padding: 8px; cursor: pointer; border-radius: 6px; opacity: 0.5; font-family: 'Bungee'; }
         .mode-toggle .active-mode { background: #333; opacity: 1; color: var(--yellow); border: 1px solid var(--yellow); }
 
-        .theme-solar { border-color: var(--orange) !important; }
-        .theme-power { border-color: var(--green) !important; }
+        .progress-track { background: #333; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 15px; }
+        .p-fill { height: 100%; background: var(--yellow); width: 0%; transition: 0.4s; }
+        .opt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+        .opt-btn { background: #333; color: white; border: 2px solid #444; padding: 15px; text-align: left; border-radius: 12px; }
     </style>
 </head>
 <body>
@@ -87,62 +76,64 @@
 
     <div id="view-home" class="view active">
         <div class="content-body" style="display:flex; flex-direction:column; justify-content:center; gap:20px;">
-            <button class="btn-yellow" style="height:100px; font-size:1.2rem;" onclick="nav('view-join')">STUDENT LOGIN</button>
-            <button class="btn-red" style="height:100px; font-size:1.2rem;" onclick="nav('view-dash')">TEACHER DASHBOARD</button>
+            <button class="btn-yellow" style="height:120px; font-size:1.5rem;" onclick="nav('view-join')">STUDENT LOGIN</button>
+            <button class="btn-red" style="height:120px; font-size:1.5rem;" onclick="nav('view-dash')">TEACHER DASHBOARD</button>
         </div>
     </div>
 
     <div id="view-dash" class="view">
-        <h3 style="color:var(--yellow); font-family:'Bungee'; margin:0 0 10px 0;">MY FOLDERS</h3>
-        <div class="editor-box">
-            <input type="text" id="new-cat" placeholder="Subject Name (e.g., STEM)">
-            <input type="text" id="new-sub" placeholder="Topic Name (e.g., Physics)">
-            <button class="btn-yellow" onclick="addFolder()">+ CREATE FOLDER</button>
-        </div>
-        <div class="content-body" id="folder-list"></div>
-        <div class="view-footer">
-            <button class="btn-ghost" onclick="nav('view-home')">BACK TO HOME</button>
-            <button class="btn-red" style="background:#444; font-size:0.6rem; padding:5px;" onclick="resetToDefault()">RESTORE DEFAULTS</button>
+        <div class="split-layout">
+            <div class="side-editor">
+                <h3 style="color:var(--yellow); font-family:'Bungee';">FOLDERS</h3>
+                <div class="editor-box">
+                    <input type="text" id="new-cat" placeholder="Subject Name">
+                    <input type="text" id="new-sub" placeholder="Topic Name">
+                    <button class="btn-yellow" onclick="addFolder()">+ CREATE FOLDER</button>
+                </div>
+                <button class="btn-ghost" onclick="nav('view-home')">BACK</button>
+                <button class="btn-red" style="margin-top:10px; background:#444; font-size:0.6rem;" onclick="resetToDefault()">RESTORE DEFAULTS</button>
+            </div>
+            <div class="main-list">
+                <div class="content-body" id="folder-list"></div>
+            </div>
         </div>
     </div>
 
     <div id="view-edit" class="view">
-        <h3 id="edit-title" style="color:var(--yellow); font-family:'Bungee'; margin:0 0 10px 0;"></h3>
-        <div class="editor-box">
-            <div class="mode-toggle">
-                <div id="m-mc" class="active-mode" onclick="setEditMode('mc')">MULTIPLE CHOICE</div>
-                <div id="m-id" onclick="setEditMode('id')">IDENTIFICATION</div>
+        <div class="split-layout">
+            <div class="side-editor">
+                <h3 id="edit-title" style="color:var(--yellow); font-family:'Bungee';"></h3>
+                <div class="editor-box">
+                    <div class="mode-toggle">
+                        <div id="m-mc" class="active-mode" onclick="setEditMode('mc')">MULTIPLE CHOICE</div>
+                        <div id="m-id" onclick="setEditMode('id')">IDENTIFICATION</div>
+                    </div>
+                    <input type="text" id="add-q" placeholder="Question">
+                    <input type="text" id="add-a" placeholder="Correct Answer">
+                    <input type="text" id="add-w" placeholder="Wrong Answers (comma separated)">
+                    <button class="btn-yellow" id="btn-save-q" onclick="saveQuestion()">+ SAVE QUESTION</button>
+                </div>
+                <div style="display:flex; gap:5px; margin-bottom:10px;">
+                    <button class="btn-game" onclick="setManualGame('Solar Forge', 'theme-solar')">SOLAR</button>
+                    <button class="btn-game" onclick="setManualGame('Power Cell', 'theme-power')">POWER</button>
+                    <button class="btn-game" onclick="setManualGame('Pizza Party', '')">PIZZA</button>
+                </div>
+                <input type="number" id="host-code" placeholder="4-DIGIT ROOM CODE">
+                <button class="btn-red" onclick="launchGame()">LAUNCH ARENA</button>
+                <button class="btn-ghost" style="margin-top:10px;" onclick="nav('view-dash')">BACK</button>
             </div>
-            <input type="text" id="add-q" placeholder="Question">
-            <input type="text" id="add-a" placeholder="Correct Answer">
-            <input type="text" id="add-w" placeholder="Wrong Answers (comma separated)">
-            <button class="btn-yellow" id="btn-save-q" onclick="saveQuestion()">+ SAVE QUESTION</button>
-        </div>
-        <div class="content-body" id="q-list"></div>
-        <div class="view-footer">
-            <div style="font-size: 0.6rem; color:#888;">THEME:</div>
-            <div style="display:flex; gap:5px;">
-                <button id="g-solar" class="btn-game" onclick="setManualGame('Solar Forge', 'theme-solar')">SOLAR</button>
-                <button id="g-power" class="btn-game" onclick="setManualGame('Power Cell', 'theme-power')">POWER</button>
-                <button id="g-pizza" class="btn-game selected" onclick="setManualGame('Pizza Party', '')">PIZZA</button>
+            <div class="main-list">
+                <div class="content-body" id="q-list"></div>
             </div>
-            <input type="number" id="host-code" placeholder="4-DIGIT ROOM CODE">
-            <button class="btn-red" onclick="launchGame()">LAUNCH ARENA</button>
-            <button class="btn-ghost" onclick="nav('view-dash')">BACK</button>
         </div>
     </div>
 
     <div id="view-lobby" class="view">
-        <h2 id="room-display" style="text-align:center; font-family:'Bungee'; color:var(--yellow); margin:0;">ROOM: --</h2>
-        <div class="content-body" style="background:#111; border-radius:15px; margin-top:10px;">
-            <table style="width:100%; border-collapse:collapse; color:white;">
-                <tbody id="live-results"></tbody>
-            </table>
+        <h2 id="room-display" style="text-align:center; font-family:'Bungee'; color:var(--yellow);">ROOM: --</h2>
+        <div class="content-body" style="background:#111; border-radius:15px; padding:15px;">
+            <table style="width:100%; color:white;"><tbody id="live-results"></tbody></table>
         </div>
-        <div class="view-footer">
-            <button class="btn-red" onclick="signalStart()">START SESSION</button>
-            <button class="btn-ghost" onclick="location.reload()">CANCEL</button>
-        </div>
+        <button class="btn-red" onclick="signalStart()">START SESSION</button>
     </div>
 
     <div id="view-join" class="view">
@@ -151,16 +142,15 @@
             <input type="number" id="stu-code" placeholder="ROOM CODE">
             <button class="btn-yellow" onclick="joinGame()">ENTER ARENA</button>
         </div>
-        <div class="view-footer"><button class="btn-ghost" onclick="nav('view-home')">BACK</button></div>
     </div>
 
     <div id="view-arena" class="view">
         <div class="progress-track"><div id="p-bar" class="p-fill"></div></div>
         <div class="content-body">
-            <h3 id="q-text" style="text-align:center; font-size:1.2rem; margin-bottom:20px;">...</h3>
+            <h3 id="q-text" style="text-align:center; font-size:1.4rem;">...</h3>
             <div id="opt-grid" class="opt-grid"></div>
             <div id="id-input-box" style="display:none; flex-direction:column; gap:10px;">
-                <input type="text" id="typed-ans" placeholder="Type answer..." style="text-align:center;">
+                <input type="text" id="typed-ans" placeholder="Type answer...">
                 <button class="btn-yellow" onclick="submitIdentification()">SUBMIT</button>
             </div>
         </div>
@@ -171,12 +161,11 @@
             <h2 style="font-family:'Bungee'; color:var(--yellow);">FINISHED!</h2>
             <div style="font-size:4rem; font-family:'Bungee';" id="final-score">0/0</div>
         </div>
-        <div class="view-footer"><button class="btn-red" onclick="location.reload()">EXIT</button></div>
+        <button class="btn-red" onclick="location.reload()">EXIT</button>
     </div>
 </div>
 
 <script>
-// FULL DATABASE INCLUDED
 const FULL_DB = {
     "Core Subjects": {
         "Effective Communication": [{q:"Identifying purpose helps determine if author wants to:", a:"Persuade, inform, or instruct", w:["Grammar","Visual Aids","Bias"]},{q:"Audience affects how the writer chooses:", a:"Word choice and level of formality", w:["Weather","Main idea","Deadline"]},{q:"Technical texts often avoid figurative language to:", a:"Provide clear and accurate information", w:["Emotional impact","Share opinions","Entertain teachers"]},{q:"Body language, facial expressions, and silence are examples of:", a:"Non-verbal communication", w:["Open listening","Pretend listening","Clarity listening"]},{q:"Exchanging messages between sender and receiver is:", a:"Communication", w:["Expression","Transmission","Interaction"]},{q:"Main purpose of feedback?", a:"To indicate if the message was understood", w:["To confuse sender","To entertain","To deliver new message"]},{q:"One of the best ways to show customers you are listening is:", a:"Appropriate eye contact", w:["Talking to others","Frowning","Asking to repeat"]},{q:"What is the nature of communication?", a:"It is dynamic and continuous", w:["Random","One-sided","Always uses words"]},{q:"Which function allows people to build relationships?", a:"Social Interaction", w:["Motivation","Information","Control"]},{q:"The 'barrier' in communication that refers to noise is:", a:"Physical barrier", w:["Semantic","Emotional","Cultural"]}],
@@ -258,7 +247,7 @@ function clearEditor() { document.getElementById('add-q').value = ''; document.g
 function refreshQList() { const ql = document.getElementById('q-list'); ql.innerHTML = ''; db[curCat][curSub].forEach((q, i) => { ql.innerHTML += `<div class="list-item"><span onclick="editQ(${i})" style="flex:1; cursor:pointer">${i+1}. ${q.q}</span><button class="btn-del" onclick="delQ(${i})">✕</button></div>`; }); }
 function delQ(i) { db[curCat][curSub].splice(i, 1); save(); refreshQList(); }
 
-function setManualGame(n, t) { manualGame = { name: n, theme: t }; document.querySelectorAll('.btn-game').forEach(b => b.classList.remove('selected')); document.getElementById(n.includes('Solar')?'g-solar':n.includes('Power')?'g-power':'g-pizza').classList.add('selected'); }
+function setManualGame(n, t) { manualGame = { name: n, theme: t }; document.getElementById('main-shell').className = "app-shell " + t; }
 
 function launchGame() {
     const code = document.getElementById('host-code').value;
