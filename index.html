@@ -9,46 +9,67 @@
         @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;700&display=swap');
         :root { --bg: #1a1a1a; --card: #252525; --red: #ff4757; --yellow: #ffcc00; --white: #ffffff; --green: #2ecc71; --orange: #ffa502; }
         
-        body { background: var(--bg); color: var(--white); font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        body { 
+            background: var(--bg); 
+            color: var(--white); 
+            font-family: 'Outfit', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
         
         .app-shell { 
             background: var(--card); 
-            width: 95vw; max-width: 500px; 
-            height: 92vh; 
+            width: 95vw; 
+            max-width: 500px; 
+            height: 95vh;
+            max-height: 800px; 
             border: 4px solid var(--red); 
             border-radius: 24px; 
-            display: flex; flex-direction: column; 
-            position: relative; overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            overflow: hidden; 
             box-shadow: 0 0 50px rgba(255, 71, 87, 0.3); 
         }
 
-        .header { background: var(--red); padding: 18px; text-align: center; border-bottom: 4px solid var(--yellow); flex-shrink: 0; }
-        .logo { font-family: 'Bungee'; font-size: 1.8rem; color: var(--yellow); text-shadow: 2px 2px 0px #000; margin: 0; }
+        .header { background: var(--red); padding: 15px; text-align: center; border-bottom: 4px solid var(--yellow); flex-shrink: 0; }
+        .logo { font-family: 'Bungee'; font-size: 1.6rem; color: var(--yellow); text-shadow: 2px 2px 0px #000; margin: 0; }
         
-        .view { display: none; flex: 1; padding: 20px; overflow-y: auto; flex-direction: column; gap: 12px; }
+        .view { display: none; flex: 1; padding: 15px; overflow: hidden; flex-direction: column; }
         .active { display: flex; }
-        .centered-content { justify-content: center; gap: 15px; }
+        
+        .scroll-area { flex: 1; overflow-y: auto; padding-right: 5px; margin: 10px 0; }
+        .scroll-area::-webkit-scrollbar { width: 6px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
 
-        button { font-family: 'Bungee'; border: none; padding: 15px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; width: 100%; transition: transform 0.1s; flex-shrink: 0; }
-        button:active { transform: scale(0.98); }
+        .view-footer { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding-top: 10px; }
+        .centered-content { justify-content: center; align-items: center; gap: 15px; }
+
+        button { font-family: 'Bungee'; border: none; padding: 14px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; width: 100%; transition: transform 0.1s; flex-shrink: 0; }
+        button:active { transform: scale(0.96); }
         
         .btn-yellow { background: var(--yellow); color: #000; }
         .btn-red { background: var(--red); color: #fff; }
-        .btn-ghost { background: transparent; border: 2px solid var(--yellow); color: var(--yellow); margin-top: auto; }
-        .btn-game { border: 2px solid #555; background: #333; color: white; padding: 10px; flex: 1; font-size: 0.65rem; }
+        .btn-ghost { background: transparent; border: 2px solid var(--yellow); color: var(--yellow); }
+        .btn-game { border: 2px solid #555; background: #333; color: white; padding: 8px; flex: 1; font-size: 0.65rem; }
         .btn-game.selected { border-color: var(--yellow); background: #444; color: var(--yellow); }
-        .btn-del { width: auto; background: transparent; color: var(--red); font-size: 1.2rem; padding: 0 10px; }
+        .btn-del { width: auto; background: transparent; color: var(--red); font-size: 1.2rem; padding: 0 10px; box-shadow: none; }
 
-        input { padding: 12px; background: #111; border: 2px solid #444; color: white; border-radius: 10px; width: calc(100% - 28px); font-family: 'Outfit'; }
-        .list-item { background: #333; padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--yellow); margin-bottom: 8px; }
+        input { padding: 12px; background: #111; border: 2px solid #444; color: white; border-radius: 10px; width: calc(100% - 28px); font-family: 'Outfit'; font-size: 0.95rem; }
+        .list-item { background: #333; padding: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--yellow); margin-bottom: 8px; }
         
-        .progress-track { background: #444; height: 12px; border-radius: 6px; overflow: hidden; margin: 10px 0; }
+        .progress-track { background: #444; height: 12px; border-radius: 6px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
         .p-fill { height: 100%; background: var(--yellow); width: 0%; transition: 0.3s; }
         
-        .opt-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
-        .opt-btn { background: #333; color: white; border: 2px solid #555; text-align: left; font-family: 'Outfit'; font-weight: bold; padding: 15px; border-radius: 12px; }
+        .opt-grid { display: grid; grid-template-columns: 1fr; gap: 8px; width: 100%; }
+        .opt-btn { background: #333; color: white; border: 2px solid #555; text-align: left; font-family: 'Outfit'; font-weight: bold; padding: 12px; border-radius: 12px; }
 
-        .editor-box { background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px solid #444; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+        .editor-box { background: #1a1a1a; padding: 12px; border-radius: 15px; border: 1px solid #444; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
         .mode-toggle { display: flex; gap: 5px; background: #111; padding: 5px; border-radius: 10px; }
         .mode-toggle div { flex: 1; text-align: center; font-size: 0.65rem; padding: 8px; cursor: pointer; border-radius: 8px; opacity: 0.5; }
         .mode-toggle .active-mode { background: #333; opacity: 1; color: var(--yellow); border: 1px solid var(--yellow); }
@@ -70,19 +91,21 @@
     </div>
 
     <div id="view-dash" class="view">
-        <h2 style="color:var(--yellow); margin:0; font-size:1.2rem;">FOLDERS</h2>
+        <h2 style="color:var(--yellow); margin:0; font-size:1.1rem;">FOLDERS</h2>
         <div class="editor-box">
             <input type="text" id="new-cat" placeholder="Subject (e.g. STEM)">
             <input type="text" id="new-sub" placeholder="Topic (e.g. Physics)">
             <button class="btn-yellow" onclick="addFolder()">+ CREATE NEW FOLDER</button>
         </div>
-        <div id="folder-list" style="flex:1; overflow-y:auto; margin: 10px 0;"></div>
-        <button class="btn-red" style="background:#444; margin-bottom:10px; font-size:0.7rem;" onclick="resetToDefault()">RESTORE FULL DATABASE</button>
-        <button class="btn-ghost" onclick="nav('view-home')">BACK</button>
+        <div id="folder-list" class="scroll-area"></div>
+        <div class="view-footer">
+            <button class="btn-red" style="background:#444; font-size:0.65rem;" onclick="resetToDefault()">RESTORE FULL DATABASE</button>
+            <button class="btn-ghost" onclick="nav('view-home')">BACK</button>
+        </div>
     </div>
 
     <div id="view-edit" class="view">
-        <h2 id="edit-title" style="color:var(--yellow); margin:0; font-size:1.1rem;"></h2>
+        <h2 id="edit-title" style="color:var(--yellow); margin:0; font-size:1.1rem; text-transform:uppercase;"></h2>
         <div class="editor-box">
             <div class="mode-toggle">
                 <div id="m-mc" class="active-mode" onclick="setEditMode('mc')">MULTIPLE CHOICE</div>
@@ -93,24 +116,28 @@
             <input type="text" id="add-w" placeholder="Wrong Answers (comma separated)">
             <button class="btn-yellow" id="btn-save-q" onclick="saveQuestion()">+ SAVE TO LIST</button>
         </div>
-        <div id="q-list" style="flex:1; overflow-y: auto; font-size:0.8rem; border-top:1px solid #444; padding-top:10px;"></div>
-        <div style="font-size: 0.7rem; color:#888;">GAME MODE:</div>
-        <div style="display:flex; gap:5px;">
-            <button id="g-solar" class="btn-game" onclick="setManualGame('Solar Forge', 'theme-solar')">SOLAR</button>
-            <button id="g-power" class="btn-game" onclick="setManualGame('Power Cell', 'theme-power')">POWER</button>
-            <button id="g-pizza" class="btn-game selected" onclick="setManualGame('Pizza Party', '')">PIZZA</button>
+        <div id="q-list" class="scroll-area" style="border-top:1px solid #444; padding-top:10px;"></div>
+        <div class="view-footer">
+            <div style="font-size: 0.65rem; color:#888;">GAME MODE:</div>
+            <div style="display:flex; gap:5px;">
+                <button id="g-solar" class="btn-game" onclick="setManualGame('Solar Forge', 'theme-solar')">SOLAR</button>
+                <button id="g-power" class="btn-game" onclick="setManualGame('Power Cell', 'theme-power')">POWER</button>
+                <button id="g-pizza" class="btn-game selected" onclick="setManualGame('Pizza Party', '')">PIZZA</button>
+            </div>
+            <input type="number" id="host-code" placeholder="ENTER ROOM CODE">
+            <button class="btn-red" onclick="launchGame()">LAUNCH LOBBY</button>
+            <button class="btn-ghost" onclick="nav('view-dash')">BACK</button>
         </div>
-        <input type="number" id="host-code" placeholder="ENTER ROOM CODE">
-        <button class="btn-red" onclick="launchGame()">LAUNCH LOBBY</button>
-        <button class="btn-ghost" onclick="nav('view-dash')">BACK</button>
     </div>
 
     <div id="view-lobby" class="view">
-        <h2 id="lobby-game-name" style="text-align:center; font-family:'Bungee';">LOBBY</h2>
-        <h3 id="room-display" style="color:var(--yellow); text-align:center; margin:0;">ROOM: --</h3>
-        <div id="live-results" style="flex:1; overflow-y:auto; background:#111; padding:10px; border-radius:10px; font-size:0.8rem; margin:10px 0;"></div>
-        <button class="btn-red" onclick="signalStart()">START SESSION</button>
-        <button class="btn-ghost" onclick="location.reload()">CANCEL</button>
+        <h2 id="lobby-game-name" style="text-align:center; font-family:'Bungee'; margin:0;">LOBBY</h2>
+        <h3 id="room-display" style="color:var(--yellow); text-align:center; margin:5px 0;">ROOM: --</h3>
+        <div id="live-results" class="scroll-area" style="background:#111; padding:10px; border-radius:10px;"></div>
+        <div class="view-footer">
+            <button class="btn-red" onclick="signalStart()">START SESSION</button>
+            <button class="btn-ghost" onclick="location.reload()">CANCEL</button>
+        </div>
     </div>
 
     <div id="view-join" class="view centered-content">
@@ -124,7 +151,7 @@
         <div id="game-badge" style="text-align:center; font-family:'Bungee'; color:var(--yellow);">ARENA</div>
         <div class="progress-track"><div id="p-bar" class="p-fill"></div></div>
         <div id="q-area" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-            <h3 id="q-text" style="text-align:center; min-height:80px; font-size:1.1rem;">...</h3>
+            <h3 id="q-text" style="text-align:center; min-height:60px; font-size:1.1rem; margin-bottom:20px;">...</h3>
             <div id="opt-grid" class="opt-grid"></div>
             <div id="id-input-box" style="display:none; width:100%; flex-direction:column; gap:10px;">
                 <input type="text" id="typed-ans" placeholder="Type answer..." style="width:calc(100% - 28px); text-align:center;">
@@ -352,7 +379,6 @@ function resetToDefault() {
     }
 }
 
-// Folder Management
 function addFolder() {
     const cat = document.getElementById('new-cat').value.trim();
     const sub = document.getElementById('new-sub').value.trim();
@@ -379,7 +405,6 @@ function renderFolders() {
 
 function delSub(cat, sub) { if(confirm(`Delete folder: ${sub}?`)) { delete db[cat][sub]; save(); renderFolders(); }}
 
-// Editor logic
 function openEditor(cat, sub) {
     curCat = cat; curSub = sub;
     document.getElementById('edit-title').innerText = sub;
@@ -436,7 +461,6 @@ function setManualGame(name, theme) {
     document.getElementById(name.includes('Solar')?'g-solar':name.includes('Power')?'g-power':'g-pizza').classList.add('selected');
 }
 
-// Multiplayer
 function launchGame() {
     const code = document.getElementById('host-code').value;
     if(!code || db[curCat][curSub].length === 0) return alert("Check code/questions!");
@@ -450,7 +474,7 @@ function launchGame() {
         connections.push(c);
         c.on('data', data => {
             if(data.type === 'result') {
-                document.getElementById('live-results').innerHTML += `<div class="score-card"><span>${data.name}</span>: <strong>${data.score}/${data.total}</strong></div>`;
+                document.getElementById('live-results').innerHTML += `<div>${data.name}: <strong>${data.score}/${data.total}</strong></div>`;
             }
         });
     });
