@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiriosity</title>
+    <title>Quiriosity | Master</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;700&display=swap');
@@ -18,13 +18,13 @@
         .view { display: none; flex: 1; padding: 15px; overflow: hidden; flex-direction: column; }
         .active { display: flex; }
         .split-layout { display: flex; flex: 1; gap: 20px; overflow: hidden; }
-        .side-bar { width: 350px; display: flex; flex-direction: column; gap: 10px; border-right: 2px solid #333; padding-right: 15px; }
+        .side-bar { width: 350px; display: flex; flex-direction: column; border-right: 2px solid #333; }
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .scroll-area { flex: 1; overflow-y: auto; padding-right: 10px; }
         .scroll-area::-webkit-scrollbar { width: 6px; }
         .scroll-area::-webkit-scrollbar-thumb { background: var(--yellow); border-radius: 10px; }
         #game-canvas { height: 150px; background: #000; border-radius: 20px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; font-size: 4rem; border: 3px dashed #333; }
-        .editor-box { background: #111; padding: 15px; border-radius: 15px; border: 1px solid #444; }
+        .editor-box { background: #111; padding: 15px; border-radius: 15px; border: 1px solid #444; margin-bottom: 10px; }
         button { font-family: 'Bungee'; border: none; padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.2s; }
         .btn-yellow { background: var(--yellow); color: #000; width: 100%; }
         .btn-red { background: var(--red); color: #fff; width: 100%; }
@@ -45,21 +45,23 @@
 
     <div id="view-home" class="view active">
         <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:20px; max-width:500px; margin:0 auto; width:100%;">
-            <button class="btn-yellow" style="height:150px; font-size:2rem;" onclick="nav('view-join')">STUDENT LOGIN</button>
-            <button class="btn-red" style="height:150px; font-size:2rem;" onclick="nav('view-dash')">TEACHER DASHBOARD</button>
+            <button class="btn-yellow" style="height:150px; font-size:2rem;" onclick="nav('view-join')">STUDENT</button>
+            <button class="btn-red" style="height:150px; font-size:2rem;" onclick="nav('view-dash')">TEACHER</button>
         </div>
     </div>
 
     <div id="view-dash" class="view">
         <div class="split-layout">
             <div class="side-bar">
-                <h2 style="font-family:'Bungee'; color:var(--yellow);">FOLDERS</h2>
-                <div class="editor-box">
-                    <input type="text" id="new-cat" placeholder="Subject (e.g. STEM)">
-                    <input type="text" id="new-sub" placeholder="Topic (e.g. Physics)">
-                    <button class="btn-yellow" onclick="addFolder()">CREATE FOLDER</button>
+                <div class="scroll-area" style="padding-right:15px;">
+                    <h2 style="font-family:'Bungee'; color:var(--yellow);">FOLDERS</h2>
+                    <div class="editor-box">
+                        <input type="text" id="new-cat" placeholder="Subject (e.g. STEM)">
+                        <input type="text" id="new-sub" placeholder="Topic (e.g. Physics)">
+                        <button class="btn-yellow" onclick="addFolder()">CREATE FOLDER</button>
+                    </div>
+                    <button class="btn-ghost" onclick="nav('view-home')">BACK TO HOME</button>
                 </div>
-                <button class="btn-ghost" onclick="nav('view-home')">BACK</button>
             </div>
             <div class="main-content">
                 <div class="scroll-area" id="folder-list"></div>
@@ -70,21 +72,23 @@
     <div id="view-edit" class="view">
         <div class="split-layout">
             <div class="side-bar">
-                <h2 id="edit-title" style="font-family:'Bungee'; color:var(--yellow); font-size:1.2rem;"></h2>
-                <div class="editor-box">
-                    <input type="text" id="add-q" placeholder="Question">
-                    <input type="text" id="add-a" placeholder="Correct Answer">
-                    <input type="text" id="add-w" placeholder="Wrong Answers (comma-sep) - LEAVE EMPTY FOR ID">
-                    <button class="btn-yellow" onclick="saveQuestion()">SAVE QUESTION</button>
+                <div class="scroll-area" style="padding-right:15px;">
+                    <h2 id="edit-title" style="font-family:'Bungee'; color:var(--yellow); font-size:1.2rem; margin-top:0;"></h2>
+                    <div class="editor-box">
+                        <input type="text" id="add-q" placeholder="Question">
+                        <input type="text" id="add-a" placeholder="Correct Answer">
+                        <input type="text" id="add-w" placeholder="Wrong Answers (comma-sep) - LEAVE EMPTY FOR ID">
+                        <button class="btn-yellow" onclick="saveQuestion()">SAVE QUESTION</button>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; margin-bottom:10px;">
+                        <button onclick="setManualGame('Solar','theme-solar')" style="background:var(--orange); font-size:0.6rem;">SOLAR</button>
+                        <button onclick="setManualGame('Power','theme-power')" style="background:var(--green); font-size:0.6rem;">POWER</button>
+                        <button onclick="setManualGame('Pizza','')" style="background:var(--red); font-size:0.6rem;">PIZZA</button>
+                    </div>
+                    <input type="number" id="host-code" placeholder="4-DIGIT ROOM CODE">
+                    <button class="btn-red" onclick="launchGame()" style="margin-bottom:10px;">LAUNCH ARENA</button>
+                    <button class="btn-ghost" onclick="nav('view-dash')">BACK TO FOLDERS</button>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;">
-                    <button onclick="setManualGame('Solar','theme-solar')" style="background:var(--orange); font-size:0.6rem;">SOLAR</button>
-                    <button onclick="setManualGame('Power','theme-power')" style="background:var(--green); font-size:0.6rem;">POWER</button>
-                    <button onclick="setManualGame('Pizza','')" style="background:var(--red); font-size:0.6rem;">PIZZA</button>
-                </div>
-                <input type="number" id="host-code" placeholder="4-DIGIT ROOM CODE">
-                <button class="btn-red" onclick="launchGame()">LAUNCH ARENA</button>
-                <button class="btn-ghost" onclick="nav('view-dash')">BACK</button>
             </div>
             <div class="main-content">
                 <div class="scroll-area" id="q-list"></div>
@@ -132,6 +136,7 @@
 </div>
 
 <script>
+// FULL_DB and Logic remain exactly the same as previous version
 const FULL_DB = {
     "Core Subjects": {
         "Effective Communication": [{q:"Identifying purpose helps determine if author wants to:", a:"Persuade, inform, or instruct", w:["Grammar","Visual Aids","Bias"]},{q:"Audience affects how the writer chooses:", a:"Word choice and level of formality", w:["Weather","Main idea","Deadline"]},{q:"Technical texts often avoid figurative language to:", a:"Provide clear and accurate information", w:["Emotional impact","Share opinions","Entertain teachers"]},{q:"Body language, facial expressions, and silence are examples of:", a:"Non-verbal communication", w:["Open listening","Pretend listening","Clarity listening"]},{q:"Exchanging messages between sender and receiver is:", a:"Communication", w:["Expression","Transmission","Interaction"]},{q:"Main purpose of feedback?", a:"To indicate if the message was understood", w:["To confuse sender","To entertain","To deliver new message"]},{q:"One of the best ways to show customers you are listening is:", a:"Appropriate eye contact", w:["Talking to others","Frowning","Asking to repeat"]},{q:"What is the nature of communication?", a:"It is dynamic and continuous", w:["Random","One-sided","Always uses words"]},{q:"Which function allows people to build relationships?", a:"Social Interaction", w:["Motivation","Information","Control"]},{q:"The 'barrier' in communication that refers to noise is:", a:"Physical barrier", w:["Semantic","Emotional","Cultural"]}],
