@@ -23,7 +23,18 @@
         .scroll-area { flex: 1; overflow-y: auto; padding-right: 10px; }
         .scroll-area::-webkit-scrollbar { width: 6px; }
         .scroll-area::-webkit-scrollbar-thumb { background: var(--yellow); border-radius: 10px; }
-        #game-canvas { height: 150px; background: #000; border-radius: 20px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; font-size: 4rem; border: 3px dashed #333; }
+        
+        /* IMPROVED GAME CANVAS */
+        #game-canvas { height: 180px; background: #000; border-radius: 20px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; font-size: 4rem; border: 3px dashed #333; position: relative; overflow: hidden; transition: 0.3s; }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        
+        .sun-body { transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { filter: drop-shadow(0 0 10px var(--orange)); } 50% { filter: drop-shadow(0 0 30px var(--yellow)); } 100% { filter: drop-shadow(0 0 10px var(--orange)); } }
+
+        .battery-fill { position: absolute; bottom: 0; width: 100%; background: var(--green); transition: 0.5s; box-shadow: 0 0 20px var(--green); }
+
         .editor-box { background: #111; padding: 15px; border-radius: 15px; border: 1px solid #444; margin-bottom: 10px; }
         button { font-family: 'Bungee'; border: none; padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.2s; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -125,7 +136,7 @@
     </div>
 
     <div id="view-arena" class="view">
-        <div id="game-canvas">🍕</div>
+        <div id="game-canvas"></div>
         <div class="progress-track"><div id="p-bar" class="p-fill"></div></div>
         <div class="scroll-area" style="text-align:center;">
             <h2 id="q-text" style="font-size:1.8rem;">...</h2>
@@ -156,15 +167,7 @@
 </div>
 
 <script>
-// Peer Config for handling different networks/firewalls
-const pConfig = {
-    config: {
-        'iceServers': [
-            { url: 'stun:stun.l.google.com:19302' },
-            { url: 'stun:stun1.l.google.com:19302' }
-        ]
-    }
-};
+const pConfig = { config: { 'iceServers': [{ url: 'stun:stun.l.google.com:19302' }, { url: 'stun:stun1.l.google.com:19302' }] } };
 
 const FULL_DB = {
     "Core Subjects": {
@@ -255,23 +258,18 @@ function setManualGame(n, t) { manualGame = { name: n, theme: t }; document.getE
 function launchGame() {
     const code = document.getElementById('host-code').value;
     if(!code || code.length < 4) return alert("Enter a 4-digit code!");
-    
     if(peer) peer.destroy();
-    
     peer = new Peer('quirios-' + code, pConfig);
-    
     peer.on('open', () => { 
         nav('view-lobby'); 
         document.getElementById('room-display').innerText = "ROOM: " + code; 
         document.getElementById('live-results').innerHTML = '';
         connections = [];
     });
-    
     peer.on('error', (err) => {
         if(err.type === 'id-taken') alert("This room code is currently active. Use another.");
         else alert("Server Error. Please try again.");
     });
-
     peer.on('connection', c => {
         c.on('data', d => { 
             if(d.type === 'join') {
@@ -294,20 +292,15 @@ function joinGame() {
     const code = document.getElementById('stu-code').value;
     const name = document.getElementById('stu-name').value || "Guest";
     const btn = document.getElementById('join-btn');
-    
     if(!code) return alert("Enter Room Code!");
-    
     currentUname = name;
     btn.innerText = "CONNECTING...";
     btn.disabled = true;
-
     if(peer) peer.destroy();
     peer = new Peer(null, pConfig);
-
     peer.on('open', () => {
         const targetId = 'quirios-' + code;
         conn = peer.connect(targetId, { reliable: true });
-        
         const timeout = setTimeout(() => {
             if(!conn.open) {
                 alert("Room not found or Host is offline.");
@@ -316,26 +309,16 @@ function joinGame() {
                 peer.destroy();
             }
         }, 7000);
-
         conn.on('open', () => { 
             clearTimeout(timeout);
             nav('view-wait'); 
             document.getElementById('wait-name').innerText = "Nickname: " + name;
             conn.send({type: 'join', name: name});
         });
-
         conn.on('data', d => { 
-            if(d.type === 'start') { 
-                activeQs = d.qs; 
-                manualGame = d.game; 
-                startQuiz(); 
-            }
+            if(d.type === 'start') { activeQs = d.qs; manualGame = d.game; startQuiz(); }
         });
-        
-        conn.on('close', () => {
-            alert("Connection lost.");
-            location.reload();
-        });
+        conn.on('close', () => { alert("Connection lost."); location.reload(); });
     });
 }
 
@@ -348,11 +331,11 @@ function startQuiz() {
     qIdx = 0; score = 0; 
     document.getElementById('main-shell').className = "app-shell " + manualGame.theme; 
     nav('view-arena');
+    updateVisual();
     showQ(); 
 }
 
 function showQ() {
-    updateVisual();
     if(qIdx >= activeQs.length) { 
         conn.send({type:'res', name:currentUname, score:score, total:activeQs.length}); 
         nav('view-result'); 
@@ -362,39 +345,74 @@ function showQ() {
     const q = activeQs[qIdx];
     document.getElementById('q-text').innerText = q.q;
     document.getElementById('p-bar').style.width = (qIdx/activeQs.length)*100 + "%";
-    
     const grid = document.getElementById('opt-grid');
     const iz = document.getElementById('input-zone');
-    
     if(!q.w || q.w[0] === "") {
-        grid.style.display = 'none';
-        iz.style.display = 'block';
+        grid.style.display = 'none'; iz.style.display = 'block';
         document.getElementById('ident-input').value = '';
     } else {
-        grid.style.display = 'grid';
-        iz.style.display = 'none';
+        grid.style.display = 'grid'; iz.style.display = 'none';
         grid.innerHTML = '';
         let opts = [q.a, ...q.w].sort(() => Math.random() - 0.5);
         opts.forEach(o => {
             const b = document.createElement('button'); b.className = 'opt-btn'; b.innerText = o;
-            b.onclick = () => { if(o === q.a) score++; qIdx++; showQ(); };
+            b.onclick = () => handleAnswer(o === q.a);
             grid.appendChild(b);
         });
     }
 }
 
+function handleAnswer(correct) {
+    const canvas = document.getElementById('game-canvas');
+    if(correct) {
+        score++;
+    } else {
+        score = Math.max(0, score - 1); // Setback: lose 1 point/level
+        canvas.classList.add('shake');
+        setTimeout(() => canvas.classList.remove('shake'), 500);
+    }
+    qIdx++;
+    updateVisual();
+    showQ();
+}
+
 function submitIdent() {
     const userAns = document.getElementById('ident-input').value.trim().toLowerCase();
     const correctAns = activeQs[qIdx].a.toLowerCase();
-    if(userAns === correctAns) score++;
-    qIdx++;
-    showQ();
+    handleAnswer(userAns === correctAns);
 }
 
 function updateVisual() {
     const canvas = document.getElementById('game-canvas');
-    const toppings = ['🍕','🍄','🍅','🥓','🧀','🥬'];
-    canvas.innerText = (manualGame.name === 'Pizza') ? toppings[score % toppings.length] : (manualGame.name === 'Power' ? '🔋' : '☀️');
+    canvas.innerHTML = ''; // Clear canvas
+    
+    if(manualGame.name === 'Pizza') {
+        const toppings = ['🍕','🍄','🍅','🥓','🧀','🥬','🌶️','🍍','🧅','🍗'];
+        let currentToppings = "🍕";
+        for(let i=1; i <= score; i++) {
+            currentToppings += toppings[i % toppings.length];
+        }
+        canvas.innerText = currentToppings;
+        canvas.style.fontSize = Math.max(1.5, 4 - (score * 0.2)) + "rem";
+    } 
+    else if(manualGame.name === 'Power') {
+        const fill = document.createElement('div');
+        fill.className = 'battery-fill';
+        const pct = Math.min(100, (score / activeQs.length) * 100);
+        fill.style.height = pct + "%";
+        canvas.appendChild(fill);
+        const icon = document.createElement('span');
+        icon.innerText = '🔋'; icon.style.position = 'relative'; icon.style.zIndex = '2';
+        canvas.appendChild(icon);
+    } 
+    else if(manualGame.name === 'Solar') {
+        const sun = document.createElement('div');
+        sun.className = 'sun-body pulse';
+        sun.innerText = '☀️';
+        const size = 1 + (score * 0.2);
+        sun.style.transform = `scale(${size})`;
+        canvas.appendChild(sun);
+    }
 }
 </script>
 </body>
