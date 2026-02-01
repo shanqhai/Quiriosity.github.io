@@ -28,36 +28,13 @@
         .shake { animation: shake 0.5s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
         
-        /* PIZZA SYSTEM */
-        .pizza-dough {
-            width: 140px;
-            height: 140px;
-            background: #f1c40f; 
-            border: 6px solid #d35400;
-            border-radius: 50%;
-            position: relative;
-            box-shadow: inset 0 0 15px #e67e22;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .topping {
-            position: absolute;
-            font-size: 1.5rem;
-            user-select: none;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes popIn {
-            0% { transform: translate(-50%, -50%) scale(0); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-
+        .pizza-dough { width: 140px; height: 140px; background: #f1c40f; border: 6px solid #d35400; border-radius: 50%; position: relative; box-shadow: inset 0 0 15px #e67e22; display: flex; justify-content: center; align-items: center; }
+        .topping { position: absolute; font-size: 1.5rem; user-select: none; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0); } 100% { transform: translate(-50%, -50%) scale(1); } }
         .sun-body { transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .pulse { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { filter: drop-shadow(0 0 10px var(--orange)); } 50% { filter: drop-shadow(0 0 30px var(--yellow)); } 100% { filter: drop-shadow(0 0 10px var(--orange)); } }
-
         .battery-fill { position: absolute; bottom: 0; width: 100%; background: var(--green); transition: 0.5s; box-shadow: 0 0 20px var(--green); }
-
         .editor-box { background: #111; padding: 15px; border-radius: 15px; border: 1px solid #444; margin-bottom: 10px; }
         button { font-family: 'Bungee'; border: none; padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.2s; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -119,9 +96,9 @@
                         <button class="btn-yellow" onclick="saveQuestion()">SAVE QUESTION</button>
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; margin-bottom:10px;">
-                        <button onclick="setManualGame('Solar','theme-solar')" style="background:var(--orange); font-size:0.6rem;">SOLAR</button>
-                        <button onclick="setManualGame('Power','theme-power')" style="background:var(--green); font-size:0.6rem;">POWER</button>
-                        <button onclick="setManualGame('Pizza','')" style="background:var(--red); font-size:0.6rem;">PIZZA</button>
+                        <button onclick="setManualGame('Solar','theme-solar')" style="background:var(--orange); font-size:0.6rem;">SOLAR FORGE</button>
+                        <button onclick="setManualGame('Power','theme-power')" style="background:var(--green); font-size:0.6rem;">POWER CELL</button>
+                        <button onclick="setManualGame('Pizza','')" style="background:var(--red); font-size:0.6rem;">PIZZA PARTY</button>
                     </div>
                     <input type="number" id="host-code" placeholder="4-DIGIT ROOM CODE">
                     <button class="btn-red" onclick="launchGame()" style="margin-bottom:10px;">LAUNCH ARENA</button>
@@ -306,15 +283,21 @@ function launchGame() {
     peer.on('connection', c => {
         c.on('data', d => { 
             if(d.type === 'join') {
+                // UID system to prevent duplicate rows for refreshes
+                let existingRow = document.getElementById(`row-${d.uid}`);
+                if (existingRow) {
+                    existingRow.innerHTML = `<td style="padding:10px;">${d.name}</td><td style="text-align:right; padding:10px; color:var(--orange);">RECONNECTED</td>`;
+                } else {
+                    const row = document.createElement('tr');
+                    row.id = `row-${d.uid}`;
+                    row.style.borderBottom = "1px solid #222";
+                    row.innerHTML = `<td style="padding:10px;">${d.name}</td><td style="text-align:right; padding:10px; color:var(--green);">JOINED</td>`;
+                    document.getElementById('live-results').appendChild(row);
+                }
                 connections.push(c);
-                const row = document.createElement('tr');
-                row.id = `row-${c.peer}`;
-                row.style.borderBottom = "1px solid #222";
-                row.innerHTML = `<td style="padding:10px;">${d.name}</td><td style="text-align:right; padding:10px; color:var(--green);">JOINED</td>`;
-                document.getElementById('live-results').appendChild(row);
             }
             if(d.type === 'res') {
-                const row = document.getElementById(`row-${c.peer}`);
+                const row = document.getElementById(`row-${d.uid}`);
                 if(row) row.innerHTML = `<td style="padding:10px;">${d.name}</td><td style="text-align:right; padding:10px; font-weight:bold;">${d.score}/${d.total}</td>`;
             }
         });
@@ -326,6 +309,14 @@ function joinGame() {
     const name = document.getElementById('stu-name').value || "Guest";
     const btn = document.getElementById('join-btn');
     if(!code) return alert("Enter Room Code!");
+
+    // UID system: Check if we have a permanent ID, or create one
+    let uid = localStorage.getItem('q_uid');
+    if(!uid) {
+        uid = 'user-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('q_uid', uid);
+    }
+
     currentUname = name;
     btn.innerText = "CONNECTING...";
     btn.disabled = true;
@@ -346,7 +337,7 @@ function joinGame() {
             clearTimeout(timeout);
             nav('view-wait'); 
             document.getElementById('wait-name').innerText = "Nickname: " + name;
-            conn.send({type: 'join', name: name});
+            conn.send({type: 'join', name: name, uid: uid}); // Send the permanent UID
         });
         conn.on('data', d => { 
             if(d.type === 'start') { activeQs = d.qs; manualGame = d.game; startQuiz(); }
@@ -370,7 +361,8 @@ function startQuiz() {
 
 function showQ() {
     if(qIdx >= activeQs.length) { 
-        conn.send({type:'res', name:currentUname, score:score, total:activeQs.length}); 
+        const myUid = localStorage.getItem('q_uid');
+        conn.send({type:'res', name:currentUname, score:score, total:activeQs.length, uid: myUid}); 
         nav('view-result'); 
         document.getElementById('final-score').innerText = `${score}/${activeQs.length}`; 
         return; 
@@ -398,9 +390,8 @@ function showQ() {
 function handleAnswer(correct) {
     const canvas = document.getElementById('game-canvas');
     if(correct) {
-        score++; // Gain point
+        score++;
     } else {
-        // No minus in whole score
         canvas.classList.add('shake');
         setTimeout(() => canvas.classList.remove('shake'), 500);
     }
@@ -430,7 +421,6 @@ function updateVisual() {
         const items = ['🍄','🍅','🥓','🧀','🥬','🌶️','🍍','🧅','🍗','🍤','🥩'];
         const currentCount = dough.querySelectorAll('.topping').length;
 
-        // Visual now strictly represents the 'score' (correct answers)
         if (score > currentCount) {
             const t = document.createElement('div');
             t.className = 'topping';
