@@ -13,8 +13,13 @@
         .app-shell { background: var(--card); width: 100%; height: 100%; border: 4px solid var(--red); display: flex; flex-direction: column; }
         .theme-solar { border-color: var(--orange) !important; --red: var(--orange); }
         .theme-power { border-color: var(--green) !important; --red: var(--green); }
-        .header { background: var(--red); padding: 10px; text-align: center; border-bottom: 4px solid var(--yellow); flex-shrink: 0; }
+        .header { background: var(--red); padding: 10px; text-align: center; border-bottom: 4px solid var(--yellow); flex-shrink: 0; position: relative; }
         .logo { font-family: 'Bungee'; font-size: 1.5rem; color: var(--yellow); text-shadow: 2px 2px 0px #000; margin: 0; }
+        
+        /* Status Indicator */
+        .conn-status { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; border-radius: 50%; background: #555; border: 2px solid #000; }
+        .status-online { background: var(--green); box-shadow: 0 0 10px var(--green); }
+
         .view { display: none; flex: 1; padding: 15px; overflow: hidden; flex-direction: column; }
         .active { display: flex; }
         .split-layout { display: flex; flex: 1; gap: 20px; overflow: hidden; }
@@ -50,12 +55,19 @@
         .del-btn { background: #441111; color: #ff4757; padding: 5px 10px; border: 1px solid #ff4757; font-size: 0.8rem; }
         .loader { width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid var(--yellow); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Teacher View Progress Styling */
+        .mini-p-track { background: #333; height: 8px; width: 80px; border-radius: 4px; display: inline-block; vertical-align: middle; margin-right: 10px; overflow: hidden; }
+        .mini-p-fill { background: var(--yellow); height: 100%; transition: 0.3s; }
     </style>
 </head>
 <body>
 
 <div class="app-shell" id="main-shell">
-    <div class="header"><h1 class="logo">QUIRIOSITY</h1></div>
+    <div class="header">
+        <h1 class="logo">QUIRIOSITY</h1>
+        <div id="status-dot" class="conn-status"></div>
+    </div>
 
     <div id="view-home" class="view active">
         <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:20px; max-width:500px; margin:0 auto; width:100%;">
@@ -117,8 +129,8 @@
             <table style="width:100%; border-collapse: collapse;">
                 <thead>
                     <tr style="border-bottom: 2px solid #333; color: var(--yellow);">
-                        <th style="text-align:left; padding-bottom:10px;">STUDENT LOGIN</th>
-                        <th style="text-align:right; padding-bottom:10px;">TEACHER DASHBOARD</th>
+                        <th style="text-align:left; padding-bottom:10px;">STUDENT</th>
+                        <th style="text-align:right; padding-bottom:10px;">PROGRESS / SCORE</th>
                     </tr>
                 </thead>
                 <tbody id="live-results"></tbody>
@@ -205,6 +217,12 @@ function nav(id) {
     if(id === 'view-dash') renderFolders();
 }
 
+function updateStatus(online) {
+    const dot = document.getElementById('status-dot');
+    if(online) dot.classList.add('status-online');
+    else dot.classList.remove('status-online');
+}
+
 function addFolder() {
     const c = document.getElementById('new-cat').value, s = document.getElementById('new-sub').value;
     if(c && s) { if(!db[c]) db[c] = {}; db[c][s] = []; save(); renderFolders(); }
@@ -255,10 +273,9 @@ function saveQuestion() {
 }
 
 function clearAllData() {
-    if(confirm("This will permanently delete ALL custom folders and questions. Continue?")) {
+    if(confirm("Permanently wipe custom data?")) {
         db = JSON.parse(JSON.stringify(FULL_DB));
-        save();
-        renderFolders();
+        save(); renderFolders();
     }
 }
 
@@ -267,82 +284,55 @@ function setManualGame(n, t) { manualGame = { name: n, theme: t }; document.getE
 
 function launchGame() {
     const code = document.getElementById('host-code').value;
-    if(!code || code.length < 4) return alert("Enter a 4-digit code!");
+    if(!code || code.length < 4) return alert("Enter 4-digit code!");
     if(peer) peer.destroy();
     peer = new Peer('quirios-' + code, pConfig);
     peer.on('open', () => { 
+        updateStatus(true);
         nav('view-lobby'); 
         document.getElementById('room-display').innerText = "ROOM: " + code; 
         document.getElementById('live-results').innerHTML = '';
         connections = [];
     });
-    peer.on('error', (err) => {
-        if(err.type === 'id-taken') alert("This room code is currently active. Use another.");
-        else alert("Server Error. Please try again.");
-    });
+    peer.on('error', () => updateStatus(false));
     peer.on('connection', c => {
         c.on('data', d => { 
             if(d.type === 'join') {
-                // UID system to prevent duplicate rows for refreshes
-                let existingRow = document.getElementById(`row-${d.uid}`);
-                if (existingRow) {
-                    existingRow.innerHTML = `<td style="padding:10px;">${d.name}</td><td style="text-align:right; padding:10px; color:var(--orange);">RECONNECTED</td>`;
-                } else {
-                    const row = document.createElement('tr');
+                let row = document.getElementById(`row-${d.uid}`);
+                if (!row) {
+                    row = document.createElement('tr');
                     row.id = `row-${d.uid}`;
-                    row.style.borderBottom = "1px solid #222";
-                    row.innerHTML = `<td style="padding:10px;">${d.name}</td><td style="text-align:right; padding:10px; color:var(--green);">JOINED</td>`;
                     document.getElementById('live-results').appendChild(row);
                 }
+                row.innerHTML = `<td style="padding:10px;">${d.name}</td><td style="text-align:right; padding:10px; color:var(--green);">JOINED</td>`;
                 connections.push(c);
             }
-            if(d.type === 'res') {
+            if(d.type === 'prog' || d.type === 'res') {
                 const row = document.getElementById(`row-${d.uid}`);
-                if(row) row.innerHTML = `<td style="padding:10px;">${d.name}</td><td style="text-align:right; padding:10px; font-weight:bold;">${d.score}/${d.total}</td>`;
+                if(row) {
+                    const pct = (d.idx / d.total) * 100;
+                    const content = d.type === 'res' ? `${d.score}/${d.total}` : `<div class="mini-p-track"><div class="mini-p-fill" style="width:${pct}%"></div></div> ${d.idx}/${d.total}`;
+                    row.innerHTML = `<td style="padding:10px;">${d.name}</td><td style="text-align:right; padding:10px; font-weight:bold;">${content}</td>`;
+                }
             }
         });
     });
 }
 
 function joinGame() {
-    const code = document.getElementById('stu-code').value;
-    const name = document.getElementById('stu-name').value || "Guest";
-    const btn = document.getElementById('join-btn');
+    const code = document.getElementById('stu-code').value, name = document.getElementById('stu-name').value || "Guest", btn = document.getElementById('join-btn');
     if(!code) return alert("Enter Room Code!");
-
-    // UID system: Check if we have a permanent ID, or create one
-    let uid = localStorage.getItem('q_uid');
-    if(!uid) {
-        uid = 'user-' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('q_uid', uid);
-    }
-
-    currentUname = name;
-    btn.innerText = "CONNECTING...";
-    btn.disabled = true;
+    let uid = localStorage.getItem('q_uid') || 'u-' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('q_uid', uid);
+    currentUname = name; btn.innerText = "CONNECTING..."; btn.disabled = true;
     if(peer) peer.destroy();
     peer = new Peer(null, pConfig);
     peer.on('open', () => {
-        const targetId = 'quirios-' + code;
-        conn = peer.connect(targetId, { reliable: true });
-        const timeout = setTimeout(() => {
-            if(!conn.open) {
-                alert("Room not found or Host is offline.");
-                btn.innerText = "ENTER ARENA";
-                btn.disabled = false;
-                peer.destroy();
-            }
-        }, 7000);
-        conn.on('open', () => { 
-            clearTimeout(timeout);
-            nav('view-wait'); 
-            document.getElementById('wait-name').innerText = "Nickname: " + name;
-            conn.send({type: 'join', name: name, uid: uid}); // Send the permanent UID
-        });
-        conn.on('data', d => { 
-            if(d.type === 'start') { activeQs = d.qs; manualGame = d.game; startQuiz(); }
-        });
-        conn.on('close', () => { alert("Connection lost."); location.reload(); });
+        updateStatus(true);
+        conn = peer.connect('quirios-' + code);
+        setTimeout(() => { if(!conn.open) { alert("Room not found!"); updateStatus(false); btn.disabled = false; btn.innerText = "ENTER ARENA"; } }, 7000);
+        conn.on('open', () => { nav('view-wait'); document.getElementById('wait-name').innerText = name; conn.send({type: 'join', name: name, uid: uid}); });
+        conn.on('data', d => { if(d.type === 'start') { activeQs = d.qs; manualGame = d.game; startQuiz(); } });
     });
 }
 
@@ -351,108 +341,48 @@ function signalStart() {
     connections.forEach(c => c.send({type:'start', qs: db[curCat][curSub], game: manualGame})); 
 }
 
-function startQuiz() { 
-    qIdx = 0; score = 0; 
-    document.getElementById('main-shell').className = "app-shell " + manualGame.theme; 
-    nav('view-arena');
-    updateVisual();
-    showQ(); 
-}
+function startQuiz() { qIdx = 0; score = 0; document.getElementById('main-shell').className = "app-shell " + manualGame.theme; nav('view-arena'); updateVisual(); showQ(); }
 
 function showQ() {
+    const myUid = localStorage.getItem('q_uid');
     if(qIdx >= activeQs.length) { 
-        const myUid = localStorage.getItem('q_uid');
-        conn.send({type:'res', name:currentUname, score:score, total:activeQs.length, uid: myUid}); 
-        nav('view-result'); 
-        document.getElementById('final-score').innerText = `${score}/${activeQs.length}`; 
+        conn.send({type:'res', name:currentUname, score:score, total:activeQs.length, uid: myUid, idx: qIdx}); 
+        nav('view-result'); document.getElementById('final-score').innerText = `${score}/${activeQs.length}`; 
         return; 
     }
+    conn.send({type:'prog', name:currentUname, uid:myUid, idx:qIdx, total:activeQs.length});
     const q = activeQs[qIdx];
     document.getElementById('q-text').innerText = q.q;
     document.getElementById('p-bar').style.width = (qIdx/activeQs.length)*100 + "%";
-    const grid = document.getElementById('opt-grid');
-    const iz = document.getElementById('input-zone');
-    if(!q.w || q.w[0] === "") {
-        grid.style.display = 'none'; iz.style.display = 'block';
-        document.getElementById('ident-input').value = '';
-    } else {
-        grid.style.display = 'grid'; iz.style.display = 'none';
-        grid.innerHTML = '';
-        let opts = [q.a, ...q.w].sort(() => Math.random() - 0.5);
-        opts.forEach(o => {
+    const grid = document.getElementById('opt-grid'), iz = document.getElementById('input-zone');
+    if(!q.w || q.w[0] === "") { grid.style.display = 'none'; iz.style.display = 'block'; document.getElementById('ident-input').value = ''; }
+    else {
+        grid.style.display = 'grid'; iz.style.display = 'none'; grid.innerHTML = '';
+        [q.a, ...q.w].sort(() => Math.random() - 0.5).forEach(o => {
             const b = document.createElement('button'); b.className = 'opt-btn'; b.innerText = o;
-            b.onclick = () => handleAnswer(o === q.a);
-            grid.appendChild(b);
+            b.onclick = () => handleAnswer(o === q.a); grid.appendChild(b);
         });
     }
 }
 
-function handleAnswer(correct) {
-    const canvas = document.getElementById('game-canvas');
-    if(correct) {
-        score++;
-    } else {
-        canvas.classList.add('shake');
-        setTimeout(() => canvas.classList.remove('shake'), 500);
-    }
-    qIdx++;
-    updateVisual();
-    showQ();
-}
-
-function submitIdent() {
-    const userAns = document.getElementById('ident-input').value.trim().toLowerCase();
-    const correctAns = activeQs[qIdx].a.toLowerCase();
-    handleAnswer(userAns === correctAns);
-}
+function handleAnswer(correct) { if(correct) score++; else { document.getElementById('game-canvas').classList.add('shake'); setTimeout(() => document.getElementById('game-canvas').classList.remove('shake'), 500); } qIdx++; updateVisual(); showQ(); }
+function submitIdent() { handleAnswer(document.getElementById('ident-input').value.trim().toLowerCase() === activeQs[qIdx].a.toLowerCase()); }
 
 function updateVisual() {
     const canvas = document.getElementById('game-canvas');
-    
     if(manualGame.name === 'Pizza') {
-        let dough = canvas.querySelector('.pizza-dough');
-        if(!dough) {
-            canvas.innerHTML = ''; 
-            dough = document.createElement('div');
-            dough.className = 'pizza-dough';
-            canvas.appendChild(dough);
-        }
-
+        let dough = canvas.querySelector('.pizza-dough') || (canvas.innerHTML = '', Object.assign(document.createElement('div'), {className:'pizza-dough'}));
+        if(!dough.parentElement) canvas.appendChild(dough);
         const items = ['🍄','🍅','🥓','🧀','🥬','🌶️','🍍','🧅','🍗','🍤','🥩'];
-        const currentCount = dough.querySelectorAll('.topping').length;
-
-        if (score > currentCount) {
-            const t = document.createElement('div');
-            t.className = 'topping';
-            t.innerText = items[score % items.length];
-            const angle = Math.random() * Math.PI * 2;
-            const dist = Math.random() * 42; 
-            const x = 50 + dist * Math.cos(angle);
-            const y = 50 + dist * Math.sin(angle);
-            t.style.left = x + '%';
-            t.style.top = y + '%';
-            t.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
+        if (score > dough.querySelectorAll('.topping').length) {
+            const t = document.createElement('div'); t.className = 'topping'; t.innerText = items[score % items.length];
+            t.style.left = (20 + Math.random()*60) + '%'; t.style.top = (20 + Math.random()*60) + '%';
             dough.appendChild(t);
         } 
-    } 
-    else if(manualGame.name === 'Power') {
-        canvas.innerHTML = '';
-        const fill = document.createElement('div');
-        fill.className = 'battery-fill';
-        const pct = Math.min(100, (score / activeQs.length) * 100);
-        fill.style.height = pct + "%";
-        canvas.appendChild(fill);
-        const icon = document.createElement('span');
-        icon.innerText = '🔋'; icon.style.position = 'relative'; icon.style.zIndex = '2';
-        canvas.appendChild(icon);
-    } 
-    else if(manualGame.name === 'Solar') {
-        canvas.innerHTML = '';
-        const sun = document.createElement('div');
-        sun.className = 'sun-body pulse';
-        sun.innerText = '☀️';
-        sun.style.transform = `scale(${1 + (score * 0.2)})`;
-        canvas.appendChild(sun);
+    } else if(manualGame.name === 'Power') {
+        canvas.innerHTML = `<div class="battery-fill" style="height:${(score/activeQs.length)*100}%"></div><span style="position:relative;z-index:2">🔋</span>`;
+    } else if(manualGame.name === 'Solar') {
+        canvas.innerHTML = `<div class="sun-body pulse" style="transform:scale(${1+(score*0.2)})">☀️</div>`;
     }
 }
 </script>
