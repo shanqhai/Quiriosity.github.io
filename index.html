@@ -11,7 +11,6 @@
         
         body { background: var(--bg); color: var(--white); font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
         
-        /* Tablet/Mobile Container */
         .app-shell { 
             background: var(--card); 
             width: 95vw; 
@@ -50,10 +49,14 @@
         .progress-track { background: #444; height: 12px; border-radius: 6px; overflow: hidden; margin: 10px 0; }
         .p-fill { height: 100%; background: var(--yellow); width: 0%; transition: 0.3s; }
         
-        .opt-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .opt-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
         .opt-btn { background: #333; color: white; border: 2px solid #555; text-align: left; font-family: 'Outfit'; font-weight: bold; padding: 15px; border-radius: 12px; }
 
         .editor-box { background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px solid #444; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+        .mode-toggle { display: flex; gap: 5px; background: #111; padding: 5px; border-radius: 10px; }
+        .mode-toggle div { flex: 1; text-align: center; font-size: 0.65rem; padding: 8px; cursor: pointer; border-radius: 8px; opacity: 0.5; }
+        .mode-toggle .active-mode { background: #333; opacity: 1; color: var(--yellow); border: 1px solid var(--yellow); }
+
         .score-card { background: #111; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 8px; border-left: 4px solid var(--green); }
 
         /* Themes */
@@ -87,21 +90,25 @@
 
     <div id="view-edit" class="view">
         <h2 id="edit-title" style="color:var(--yellow); margin:0; font-size:1.1rem;"></h2>
+        <div class="editor-box">
+            <div class="mode-toggle">
+                <div id="m-mc" class="active-mode" onclick="setEditMode('mc')">MULTIPLE CHOICE</div>
+                <div id="m-id" onclick="setEditMode('id')">IDENTIFICATION</div>
+            </div>
+            <input type="text" id="add-q" placeholder="Question?">
+            <input type="text" id="add-a" placeholder="Correct Answer">
+            <input type="text" id="add-w" placeholder="Wrong Answers (comma separated)">
+            <button class="btn-yellow" id="btn-save-q" onclick="saveQuestion()">+ SAVE TO LIST</button>
+        </div>
+
+        <div id="q-list" style="flex:1; overflow-y: auto; font-size:0.8rem; border-top:1px solid #444; padding-top:10px;"></div>
+        
         <div style="font-size: 0.7rem; color:#888;">SELECT GAME MODE:</div>
         <div style="display:flex; gap:5px;">
             <button id="g-solar" class="btn-game" onclick="setManualGame('Solar Forge', 'theme-solar')">SOLAR</button>
             <button id="g-power" class="btn-game" onclick="setManualGame('Power Cell', 'theme-power')">POWER</button>
             <button id="g-pizza" class="btn-game selected" onclick="setManualGame('Pizza Party', '')">PIZZA</button>
         </div>
-        
-        <div class="editor-box">
-            <input type="text" id="add-q" placeholder="New Question?">
-            <input type="text" id="add-a" placeholder="Correct Answer">
-            <input type="text" id="add-w" placeholder="Wrong Answers (comma separated)">
-            <button class="btn-yellow" onclick="addQuestion()">+ ADD TO LIST</button>
-        </div>
-
-        <div id="q-list" style="flex:1; overflow-y: auto; font-size:0.8rem; border-top:1px solid #444; padding-top:10px;"></div>
         
         <input type="number" id="host-code" placeholder="ENTER ROOM CODE">
         <button class="btn-red" onclick="launchGame()">LAUNCH LOBBY</button>
@@ -111,11 +118,7 @@
     <div id="view-lobby" class="view">
         <h2 id="lobby-game-name" class="game-title">ARENA</h2>
         <h3 id="room-display" style="color:var(--yellow); text-align:center; margin:0;">ROOM: --</h3>
-        <div style="display:flex; justify-content: space-around; background:#333; padding:15px; border-radius:15px; margin: 10px 0;">
-            <div style="text-align:center;"><div id="p-count" style="font-size:2rem; font-family:'Bungee';">0</div><small>PLAYERS</small></div>
-            <div style="text-align:center;"><div id="f-count" style="font-size:2rem; font-family:'Bungee'; color:var(--green);">0</div><small>DONE</small></div>
-        </div>
-        <div id="live-results" style="flex:1; overflow-y:auto; background:#111; padding:10px; border-radius:10px; font-size:0.8rem;"></div>
+        <div id="live-results" style="flex:1; overflow-y:auto; background:#111; padding:10px; border-radius:10px; font-size:0.8rem; margin:10px 0;"></div>
         <button class="btn-red" onclick="signalStart()">START SESSION</button>
         <button class="btn-ghost" onclick="location.reload()">CANCEL</button>
     </div>
@@ -130,9 +133,13 @@
     <div id="view-arena" class="view">
         <div id="game-badge" class="game-title">...</div>
         <div class="progress-track"><div id="p-bar" class="p-fill"></div></div>
-        <div id="q-area" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-            <h3 id="q-text" style="text-align:center; min-height:80px; font-size:1.1rem;">Waiting...</h3>
+        <div id="q-area" style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <h3 id="q-text" style="text-align:center; min-height:80px; font-size:1.1rem; width:100%;">Waiting...</h3>
             <div id="opt-grid" class="opt-grid"></div>
+            <div id="id-input-box" style="display:none; width:100%; flex-direction:column; gap:10px;">
+                <input type="text" id="typed-ans" placeholder="Type your answer..." style="width:calc(100% - 28px); text-align:center;">
+                <button class="btn-yellow" onclick="submitIdentification()">SUBMIT</button>
+            </div>
         </div>
     </div>
 
@@ -336,7 +343,8 @@ const FULL_DB = {
 let db = JSON.parse(localStorage.getItem('quiriosity_master_db')) || FULL_DB;
 let peer, conn, connections = [], curSub = '', curCat = '', qIdx = 0, score = 0, activeQs = [];
 let manualGame = { name: 'PIZZA PARTY', theme: '' };
-let finishers = 0;
+let editMode = 'mc';
+let editingIndex = -1;
 
 function nav(id) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -344,23 +352,23 @@ function nav(id) {
     if(id === 'view-dash') renderFolders();
 }
 
-// --- DB Control ---
 function save() { localStorage.setItem('quiriosity_master_db', JSON.stringify(db)); }
 
 function resetToDefault() {
-    if(confirm("Delete all custom folders and restore the 100+ original questions?")) {
-        db = JSON.parse(JSON.stringify(FULL_DB));
-        save(); renderFolders();
+    if(confirm("Restore default database and original questions?")) { 
+        db = JSON.parse(JSON.stringify(FULL_DB)); 
+        save(); 
+        renderFolders(); 
     }
 }
 
-// --- Folder Management ---
+// Folder Management
 function addFolder() {
     const cat = document.getElementById('new-cat').value.trim();
     const sub = document.getElementById('new-sub').value.trim();
     if(!cat || !sub) return alert("Fill Subject and Topic!");
     if(!db[cat]) db[cat] = {};
-    if(!db[cat][sub]) db[cat][sub] = [];
+    db[cat][sub] = [];
     save(); renderFolders();
     document.getElementById('new-sub').value = '';
 }
@@ -381,27 +389,51 @@ function renderFolders() {
 
 function delSub(cat, sub) { if(confirm(`Delete folder: ${sub}?`)) { delete db[cat][sub]; save(); renderFolders(); }}
 
-// --- Question Editor ---
+// Editor logic
 function openEditor(cat, sub) {
     curCat = cat; curSub = sub;
     document.getElementById('edit-title').innerText = sub;
-    refreshQList(); nav('view-edit');
+    clearEditor(); refreshQList(); nav('view-edit');
 }
 
-function addQuestion() {
-    const q = document.getElementById('add-q').value, a = document.getElementById('add-a').value, wRaw = document.getElementById('add-w').value;
-    if(!q || !a || !wRaw) return alert("Fill all fields!");
-    db[curCat][curSub].push({ q, a, w: wRaw.split(',').map(s => s.trim()) });
-    save(); refreshQList();
+function setEditMode(mode) {
+    editMode = mode;
+    document.getElementById('m-mc').className = mode === 'mc' ? 'active-mode' : '';
+    document.getElementById('m-id').className = mode === 'id' ? 'active-mode' : '';
+    document.getElementById('add-w').style.display = mode === 'mc' ? 'block' : 'none';
+}
+
+function saveQuestion() {
+    const q = document.getElementById('add-q').value, a = document.getElementById('add-a').value, w = document.getElementById('add-w').value;
+    if(!q || !a) return alert("Fill Q and A!");
+    const newQ = { q, a, type: editMode, w: editMode === 'mc' ? w.split(',').map(s=>s.trim()) : [] };
+    if(editingIndex > -1) db[curCat][curSub][editingIndex] = newQ;
+    else db[curCat][curSub].push(newQ);
+    save(); clearEditor(); refreshQList();
+}
+
+function editQ(i) {
+    editingIndex = i;
+    const item = db[curCat][curSub][i];
+    document.getElementById('add-q').value = item.q;
+    document.getElementById('add-a').value = item.a;
+    document.getElementById('add-w').value = item.w ? item.w.join(',') : '';
+    setEditMode(item.type || 'mc');
+    document.getElementById('btn-save-q').innerText = "✓ UPDATE QUESTION";
+}
+
+function clearEditor() {
     document.getElementById('add-q').value = ''; document.getElementById('add-a').value = ''; document.getElementById('add-w').value = '';
+    document.getElementById('btn-save-q').innerText = "+ SAVE TO LIST";
+    editingIndex = -1;
 }
 
 function refreshQList() {
     const ql = document.getElementById('q-list'); ql.innerHTML = '';
     db[curCat][curSub].forEach((q, i) => { 
-        ql.innerHTML += `<div style="padding:10px; border-bottom:1px solid #444; display:flex; justify-content:space-between; align-items:center;">
-            <span>${i+1}. ${q.q}</span>
-            <span style="color:var(--red); cursor:pointer; font-weight:bold; padding-left:10px;" onclick="delQ(${i})">✕</span>
+        ql.innerHTML += `<div class="list-item" style="border-left-color:${q.type==='id'?'var(--orange)':'var(--yellow)'}">
+            <span onclick="editQ(${i})" style="cursor:pointer; flex:1;">${i+1}. ${q.q}</span>
+            <button class="btn-del" onclick="delQ(${i})">✕</button>
         </div>`; 
     });
 }
@@ -411,35 +443,27 @@ function delQ(i) { db[curCat][curSub].splice(i, 1); save(); refreshQList(); }
 function setManualGame(name, theme) {
     manualGame = { name, theme };
     document.querySelectorAll('.btn-game').forEach(b => b.classList.remove('selected'));
-    const id = name === 'Solar Forge' ? 'g-solar' : name === 'Power Cell' ? 'g-power' : 'g-pizza';
-    document.getElementById(id).classList.add('selected');
+    document.getElementById(name.includes('Solar')?'g-solar':name.includes('Power')?'g-power':'g-pizza').classList.add('selected');
 }
 
-// --- Multiplayer Logic ---
+// Multiplayer
 function launchGame() {
     const code = document.getElementById('host-code').value;
-    if(!code) return alert("Enter Room Code!");
-    if(db[curCat][curSub].length === 0) return alert("Empty folder!");
-    finishers = 0; connections = [];
-    document.getElementById('live-results').innerHTML = '';
+    if(!code || db[curCat][curSub].length === 0) return alert("Check code/questions!");
     peer = new Peer('q-' + code);
     peer.on('open', () => {
         nav('view-lobby');
         document.getElementById('room-display').innerText = "ROOM: " + code;
-        document.getElementById('lobby-game-name').innerText = manualGame.name;
+        document.getElementById('live-results').innerHTML = 'Waiting for players...';
     });
     peer.on('connection', c => {
         connections.push(c);
-        document.getElementById('p-count').innerText = connections.length;
         c.on('data', data => {
             if(data.type === 'result') {
-                finishers++;
-                document.getElementById('f-count').innerText = finishers;
-                document.getElementById('live-results').innerHTML += `<div class="score-card"><span>${data.name}</span><strong>${data.score}/${data.total}</strong></div>`;
+                document.getElementById('live-results').innerHTML += `<div class="score-card"><span>${data.name}</span>: <strong>${data.score}/${data.total}</strong></div>`;
             }
         });
     });
-    peer.on('error', () => alert("Code taken or error."));
 }
 
 function joinGame() {
@@ -447,7 +471,7 @@ function joinGame() {
     peer = new Peer();
     peer.on('open', () => {
         conn = peer.connect('q-' + code);
-        conn.on('open', () => { nav('view-arena'); document.getElementById('q-text').innerText = "READY! Waiting..."; });
+        conn.on('open', () => { nav('view-arena'); });
         conn.on('data', data => {
             if(data.type === 'start') {
                 activeQs = data.qs;
@@ -459,9 +483,7 @@ function joinGame() {
     });
 }
 
-function signalStart() {
-    connections.forEach(c => c.send({type:'start', qs: db[curCat][curSub], game: manualGame}));
-}
+function signalStart() { connections.forEach(c => c.send({type:'start', qs: db[curCat][curSub], game: manualGame})); }
 
 function startQuiz(userName) { qIdx = 0; score = 0; showQ(userName); }
 
@@ -475,14 +497,32 @@ function showQ(userName) {
     const q = activeQs[qIdx];
     document.getElementById('q-text').innerText = q.q;
     document.getElementById('p-bar').style.width = (qIdx/activeQs.length)*100 + "%";
-    const opts = [q.a, ...q.w].sort(() => Math.random() - 0.5);
-    const grid = document.getElementById('opt-grid'); grid.innerHTML = '';
-    opts.forEach(o => {
-        const btn = document.createElement('button');
-        btn.className = 'opt-btn'; btn.innerText = o;
-        btn.onclick = () => { if(o === q.a) score++; qIdx++; showQ(userName); };
-        grid.appendChild(btn);
-    });
+    
+    const grid = document.getElementById('opt-grid');
+    const idBox = document.getElementById('id-input-box');
+    grid.innerHTML = ''; idBox.style.display = 'none';
+
+    if(q.type === 'id') {
+        idBox.style.display = 'flex';
+        document.getElementById('typed-ans').value = '';
+        document.getElementById('typed-ans').focus();
+    } else {
+        const opts = [q.a, ...q.w].sort(() => Math.random() - 0.5);
+        opts.forEach(o => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn'; btn.innerText = o;
+            btn.onclick = () => { if(o === q.a) score++; qIdx++; showQ(userName); };
+            grid.appendChild(btn);
+        });
+    }
+}
+
+function submitIdentification() {
+    const val = document.getElementById('typed-ans').value.trim().toLowerCase();
+    const correct = activeQs[qIdx].a.toLowerCase();
+    if(val === correct) score++;
+    qIdx++;
+    showQ(document.getElementById('stu-name').value || "Guest");
 }
 </script>
 </body>
