@@ -26,6 +26,7 @@
         #game-canvas { height: 150px; background: #000; border-radius: 20px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; font-size: 4rem; border: 3px dashed #333; }
         .editor-box { background: #111; padding: 15px; border-radius: 15px; border: 1px solid #444; margin-bottom: 10px; }
         button { font-family: 'Bungee'; border: none; padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-yellow { background: var(--yellow); color: #000; width: 100%; }
         .btn-red { background: var(--red); color: #fff; width: 100%; }
         .btn-ghost { background: transparent; border: 2px solid var(--yellow); color: var(--yellow); width: 100%; }
@@ -36,6 +37,10 @@
         .progress-track { background: #333; height: 15px; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
         .p-fill { height: 100%; background: var(--yellow); width: 0%; transition: 0.5s; }
         .del-btn { background: #441111; color: #ff4757; padding: 5px 10px; border: 1px solid #ff4757; font-size: 0.8rem; }
+        
+        /* New Student Loading View */
+        .loader { width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid var(--yellow); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -97,11 +102,29 @@
     </div>
 
     <div id="view-lobby" class="view">
-        <h2 id="room-display" style="text-align:center; font-family:'Bungee'; color:var(--yellow);">ROOM: --</h2>
+        <h2 id="room-display" style="text-align:center; font-family:'Bungee'; color:var(--yellow); margin-bottom:5px;">ROOM: --</h2>
+        <p style="text-align:center; margin:0 0 10px 0; color:#888;">Waiting for students to join...</p>
         <div class="scroll-area" style="background:#111; border-radius:20px; padding:20px;">
-            <table style="width:100%;"><tbody id="live-results"></tbody></table>
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #333; color: var(--yellow);">
+                        <th style="text-align:left; padding-bottom:10px;">STUDENT</th>
+                        <th style="text-align:right; padding-bottom:10px;">STATUS/SCORE</th>
+                    </tr>
+                </thead>
+                <tbody id="live-results"></tbody>
+            </table>
         </div>
         <button class="btn-red" style="margin-top:10px;" onclick="signalStart()">START SESSION</button>
+    </div>
+
+    <div id="view-wait" class="view">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+            <div class="loader"></div>
+            <h1 style="font-family:'Bungee'; color:var(--yellow);">CONNECTED!</h1>
+            <p>Waiting for the teacher to start the game...</p>
+            <p id="wait-name" style="font-weight:bold; color:var(--red);"></p>
+        </div>
     </div>
 
     <div id="view-arena" class="view">
@@ -129,14 +152,13 @@
         <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width:400px; margin:0 auto; width:100%;">
             <input type="text" id="stu-name" placeholder="NICKNAME">
             <input type="number" id="stu-code" placeholder="ROOM CODE">
-            <button class="btn-yellow" onclick="joinGame()">ENTER ARENA</button>
+            <button class="btn-yellow" id="join-btn" onclick="joinGame()">ENTER ARENA</button>
             <button class="btn-ghost" style="margin-top:10px;" onclick="nav('view-home')">BACK</button>
         </div>
     </div>
 </div>
 
 <script>
-// FULL_DB and Logic remain exactly the same as previous version
 const FULL_DB = {
     "Core Subjects": {
         "Effective Communication": [{q:"Identifying purpose helps determine if author wants to:", a:"Persuade, inform, or instruct", w:["Grammar","Visual Aids","Bias"]},{q:"Audience affects how the writer chooses:", a:"Word choice and level of formality", w:["Weather","Main idea","Deadline"]},{q:"Technical texts often avoid figurative language to:", a:"Provide clear and accurate information", w:["Emotional impact","Share opinions","Entertain teachers"]},{q:"Body language, facial expressions, and silence are examples of:", a:"Non-verbal communication", w:["Open listening","Pretend listening","Clarity listening"]},{q:"Exchanging messages between sender and receiver is:", a:"Communication", w:["Expression","Transmission","Interaction"]},{q:"Main purpose of feedback?", a:"To indicate if the message was understood", w:["To confuse sender","To entertain","To deliver new message"]},{q:"One of the best ways to show customers you are listening is:", a:"Appropriate eye contact", w:["Talking to others","Frowning","Asking to repeat"]},{q:"What is the nature of communication?", a:"It is dynamic and continuous", w:["Random","One-sided","Always uses words"]},{q:"Which function allows people to build relationships?", a:"Social Interaction", w:["Motivation","Information","Control"]},{q:"The 'barrier' in communication that refers to noise is:", a:"Physical barrier", w:["Semantic","Emotional","Cultural"]}],
@@ -225,30 +247,118 @@ function setManualGame(n, t) { manualGame = { name: n, theme: t }; document.getE
 
 function launchGame() {
     const code = document.getElementById('host-code').value;
-    if(!code) return alert("Code!");
+    if(!code) return alert("Enter a 4-digit code first!");
+    
+    if(peer) peer.destroy();
+    
     peer = new Peer('q-' + code);
-    peer.on('open', () => { nav('view-lobby'); document.getElementById('room-display').innerText = "ROOM: " + code; });
+    
+    peer.on('open', () => { 
+        nav('view-lobby'); 
+        document.getElementById('room-display').innerText = "ROOM: " + code; 
+        document.getElementById('live-results').innerHTML = '';
+        connections = [];
+    });
+    
+    peer.on('error', (err) => {
+        alert("Peer Error: Room code might be taken. Try a different one.");
+        console.error(err);
+    });
+
     peer.on('connection', c => {
-        c.on('open', () => { document.getElementById('live-results').innerHTML += `<tr id="row-${c.peer}"><td>NEW STUDENT</td><td style="text-align:right">...</td></tr>`; });
-        c.on('data', d => { if(d.type==='res') document.getElementById(`row-${c.peer}`).innerHTML = `<td>${d.name}</td><td style="text-align:right"><strong>${d.score}/${d.total}</strong></td>`; });
-        connections.push(c);
+        c.on('open', () => { 
+            connections.push(c);
+        });
+        
+        c.on('data', d => { 
+            if(d.type === 'join') {
+                // Remove existing if reconnecting
+                const existing = document.getElementById(`row-${c.peer}`);
+                if(existing) existing.remove();
+                
+                document.getElementById('live-results').innerHTML += `
+                    <tr id="row-${c.peer}" style="border-bottom: 1px solid #222;">
+                        <td style="padding:10px;">${d.name}</td>
+                        <td style="text-align:right; padding:10px; color:var(--yellow);">READY</td>
+                    </tr>`;
+            }
+            if(d.type === 'res') {
+                const row = document.getElementById(`row-${c.peer}`);
+                if(row) row.innerHTML = `<td style="padding:10px;">${d.name}</td><td style="text-align:right; padding:10px;"><strong>${d.score}/${d.total}</strong></td>`;
+            }
+        });
+        
+        c.on('close', () => {
+            const row = document.getElementById(`row-${c.peer}`);
+            if(row) row.style.opacity = "0.3";
+        });
     });
 }
 
 function joinGame() {
-    const code = document.getElementById('stu-code').value, name = document.getElementById('stu-name').value || "Guest";
+    const code = document.getElementById('stu-code').value;
+    const name = document.getElementById('stu-name').value || "Guest";
+    const btn = document.getElementById('join-btn');
+    
+    if(!code) return alert("Enter a Room Code!");
+    
     currentUname = name;
+    btn.innerText = "CONNECTING...";
+    btn.disabled = true;
+
+    if(peer) peer.destroy();
     peer = new Peer();
+
     peer.on('open', () => {
         conn = peer.connect('q-' + code);
-        conn.on('open', () => { nav('view-arena'); });
-        conn.on('data', d => { if(d.type==='start') { activeQs = d.qs; manualGame = d.game; startQuiz(); }});
+        
+        // Timeout if room doesn't exist
+        const timeout = setTimeout(() => {
+            if(!conn.open) {
+                alert("Room not found! Check the code.");
+                btn.innerText = "ENTER ARENA";
+                btn.disabled = false;
+                peer.destroy();
+            }
+        }, 5000);
+
+        conn.on('open', () => { 
+            clearTimeout(timeout);
+            nav('view-wait'); 
+            document.getElementById('wait-name').innerText = "Playing as: " + name;
+            conn.send({type: 'join', name: name});
+            btn.innerText = "ENTER ARENA";
+            btn.disabled = false;
+        });
+
+        conn.on('data', d => { 
+            if(d.type === 'start') { 
+                activeQs = d.qs; 
+                manualGame = d.game; 
+                startQuiz(); 
+            }
+        });
+
+        conn.on('error', (err) => {
+            alert("Connection error occurred.");
+            btn.innerText = "ENTER ARENA";
+            btn.disabled = false;
+        });
     });
 }
 
-function signalStart() { connections.forEach(c => c.send({type:'start', qs: db[curCat][curSub], game: manualGame})); }
+function signalStart() { 
+    if(connections.length === 0) return alert("No students have joined yet!");
+    connections.forEach(c => c.send({type:'start', qs: db[curCat][curSub], game: manualGame})); 
+}
 
-function startQuiz() { qIdx = 0; score = 0; document.getElementById('main-shell').className = "app-shell " + manualGame.theme; showQ(); }
+function startQuiz() { 
+    qIdx = 0; 
+    score = 0; 
+    document.getElementById('main-shell').className = "app-shell " + manualGame.theme; 
+    nav('view-arena');
+    showQ(); 
+}
 
 function showQ() {
     updateVisual();
